@@ -49,14 +49,13 @@ const Search = () => {
       bgGradient="linear(to-r, green.200, pink.500)"
       borderRadius="md"
     >
-      <Flex
-        justifyContent="center"
-        alignItems="center"
-        pt={10}
-        bgGradient="linear(to-r, green.200, pink.500)"
-      >
+      <Flex justifyContent="center" alignItems="center" pt={10}>
         <VStack pl={50}>
-          <HStack width="60%" justifySelf="center" mb={4}>
+          <HStack
+            width={{ base: "100%", md: "80%", lg: "60%" }}
+            justifySelf="center"
+            mb={4}
+          >
             <IconButton
               aria-label="Go back"
               icon={<ArrowBackIcon />}
@@ -70,7 +69,7 @@ const Search = () => {
           </HStack>
           <SimpleGrid
             columns={columns}
-            maxWidth="60%"
+            maxWidth={{ base: "90%", md: "80%", lg: "60%" }}
             spacing={8}
             pr={50}
             pt={10}
