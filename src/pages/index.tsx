@@ -85,7 +85,7 @@ export default function Home() {
         </Heading>
 
         <Text mt={4} fontSize="xl" color="white">
-          We're glad to have you here. Let's get started!
+          We&apos;re glad to have you here. Let&apos;s get started!
         </Text>
 
         {response && (
