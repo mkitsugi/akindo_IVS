@@ -65,7 +65,6 @@ export default function Home() {
       exit="exit"
       variants={variants}
       transition={transition}
-      bgGradient="linear(to-r, green.200, pink.500)"
       minHeight="100vh"
       display="flex"
       flexDirection="column"
@@ -104,7 +103,7 @@ export default function Home() {
           justify="center"
           mt={10}
         >
-          <Link href="/register" passHref>
+          <Link href="/form1" passHref>
             <Button color="white" bg="black" size="lg">
               登録に進む
             </Button>
