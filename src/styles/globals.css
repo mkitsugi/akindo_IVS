@@ -10,14 +10,15 @@
 
 @font-face {
   font-family: "MyFont";
-  src: url("/public/fonts/筑紫オールドゴシック.ttf") format("truetype");
-  /* 他のフォントプロパティを指定することもできます */
+  src: url("/public/fonts/tsukushi.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
 }
 
 .wrapper {
   max-width: 375px;
   margin: auto;
-  background-color: #fff;
+  /* background-color: #fff; */
 }
 
 html,

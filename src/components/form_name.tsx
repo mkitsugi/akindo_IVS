@@ -1,30 +1,13 @@
 import { useState } from "react";
-import styled from "styled-components";
+import { Flex, Text, Input, Button, HStack } from "@chakra-ui/react";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 
 interface Step2Props {
   onNext: (nickname: string) => void;
+  onBack: () => void;
 }
 
-const CenteredContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh; // viewport height
-`;
-
-const StyledInput = styled.input`
-  padding: 10px;
-  font-size: 1em;
-  width: 200px;
-`;
-
-const StyledButton = styled.button`
-  margin-top: 10px;
-  padding: 10px 20px;
-`;
-
-function Step2({ onNext }: Step2Props) {
+function Step2({ onNext, onBack }: Step2Props) {
   const [nickname, setNickname] = useState("");
 
   const handleButtonClick = () => {
@@ -32,16 +15,55 @@ function Step2({ onNext }: Step2Props) {
   };
 
   return (
-    <CenteredContainer>
-      <h1>あなたのニックネームは？</h1>
-      <StyledInput
+    <Flex direction="column" align="center" justify="center" height="100vh">
+      <HStack
+        alignSelf="center"
+        justifyContent="center"
+        alignItems="center"
+        spacing={5}
+        mr={6}
+        py={10}
+      >
+        <ArrowBackIcon
+          boxSize={6}
+          onClick={onBack}
+          _hover={{
+            color: "gray", // マウスホバー時に少し下に移動
+          }}
+          transition="0.2s"
+        />{" "}
+        {/* 戻るアイコン */}
+        <Text fontSize="2xl" fontWeight="bold">
+          あなたのニックネームは？
+        </Text>
+      </HStack>
+      <Input
         type="text"
         value={nickname}
         onChange={(e) => setNickname(e.target.value)}
         placeholder="ニックネームを入力"
+        mb={10}
+        w="280px"
+        h="60px"
+        // variant="filled"
+        focusBorderColor="red.300"
+        bg="white.200"
+        _hover={{ bg: "gray.100" }}
       />
-      <StyledButton onClick={handleButtonClick}>次へ</StyledButton>
-    </CenteredContainer>
+      <Button
+        onClick={handleButtonClick}
+        w="280px"
+        bg="red.300"
+        color="white"
+        _hover={{
+          bg: "red.200",
+          transform: "translateY(5px)", // マウスホバー時に少し下に移動
+        }}
+        transition="0.2s" // トランジション効果を追加
+      >
+        次へ
+      </Button>
+    </Flex>
   );
 }
 

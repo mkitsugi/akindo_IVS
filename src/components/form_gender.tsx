@@ -1,26 +1,8 @@
-import { useState } from "react";
-import styled from "styled-components";
+import { Flex, Text, Button } from "@chakra-ui/react";
 
 interface Step1Props {
   onNext: (selectedGender: string) => void;
 }
-
-const CenteredContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  font-family: "MyFont", sans-serif;
-`;
-
-const RoundedButton = styled.button`
-  border-radius: 50%; //円形のボタン
-  width: 100px;
-  height: 100px;
-  margin: 10px;
-  font-size: 1.5em;
-`;
 
 function Step1({ onNext }: Step1Props) {
   const handleButtonClick = (selectedGender: string) => {
@@ -28,18 +10,49 @@ function Step1({ onNext }: Step1Props) {
   };
 
   return (
-    <CenteredContainer>
-      <h1>あなたの性別は？</h1>
-      <RoundedButton onClick={() => handleButtonClick("男性")}>
+    <Flex
+      direction="column"
+      align="center"
+      justify="center"
+      height="100vh"
+      fontFamily="MyFont"
+    >
+      <Text fontSize="2xl" fontWeight="bold">
+        あなたの性別は？
+      </Text>
+      <Button
+        m={2}
+        w="100px"
+        h="100px"
+        fontSize="1.5em"
+        borderRadius="50%"
+        bgColor="blue.100"
+        onClick={() => handleButtonClick("男性")}
+      >
         男性
-      </RoundedButton>
-      <RoundedButton onClick={() => handleButtonClick("女性")}>
+      </Button>
+      <Button
+        m={2}
+        w="100px"
+        h="100px"
+        fontSize="1.5em"
+        borderRadius="50%"
+        bgColor="pink.200"
+        onClick={() => handleButtonClick("女性")}
+      >
         女性
-      </RoundedButton>
-      <RoundedButton onClick={() => handleButtonClick("その他")}>
+      </Button>
+      <Button
+        m={2}
+        w="100px"
+        h="100px"
+        fontSize="1.5em"
+        borderRadius="50%"
+        onClick={() => handleButtonClick("その他")}
+      >
         その他
-      </RoundedButton>
-    </CenteredContainer>
+      </Button>
+    </Flex>
   );
 }
 

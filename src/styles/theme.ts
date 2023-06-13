@@ -13,10 +13,9 @@ export const theme = extendTheme({
     "light-gray": "#333333",
   },
   fonts: {
-    footer: "'Roboto', sans-serif",
-    kumbh: "'Kumbh Sans', sans-serif",
-    gothic: "'Gothic A1', sans-serif",
-    inter: "'Inter', sans-serif",
+    body: "MyFont, system-ui, sans-serif",
+    heading: "MyFont, Arial, sans-serif",
+    mono: "MyFont, monospace",
   },
   fontWeights: {
     weight400: 400,
@@ -26,3 +25,5 @@ export const theme = extendTheme({
     weight900: 900,
   },
 });
+
+export default theme;

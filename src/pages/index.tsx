@@ -79,16 +79,16 @@ export default function Home() {
         justifyContent="center"
         height="100vh"
       >
-        <Heading as="h1" size="3xl" color="white">
-          Welcome to Mint!
+        <Heading as="h1" size="3xl" color="black">
+          Welcome to Osekka.ai!
         </Heading>
 
-        <Text mt={4} fontSize="xl" color="white">
+        <Text mt={4} fontSize="xl" color="black">
           We&apos;re glad to have you here. Let&apos;s get started!
         </Text>
 
         {response && (
-          <Box mt={8} p={4} bg="white" borderRadius="md">
+          <Box mt={8} p={4} borderRadius="md">
             <Text fontWeight="bold" fontSize="lg">
               AI Response:
             </Text>
@@ -103,7 +103,7 @@ export default function Home() {
           justify="center"
           mt={10}
         >
-          <Link href="/form1" passHref>
+          <Link href="/form" passHref>
             <Button color="white" bg="black" size="lg">
               登録に進む
             </Button>
