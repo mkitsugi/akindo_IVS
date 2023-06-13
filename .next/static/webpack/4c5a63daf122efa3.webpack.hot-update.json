@@ -1,0 +1,1 @@
+{"c":["webpack"],"r":["pages/chat/[roomId]"],"m":["./node_modules/next/dist/build/webpack/loaders/next-client-pages-loader.js?absolutePagePath=%2FUsers%2Ftakayaokamoto%2FDevelop%2Fakindo_IVS%2Fakindo_IVS%2Fsrc%2Fpages%2Fchat%2F%5BroomId%5D%2Findex.tsx&page=%2Fchat%2F%5BroomId%5D!","./node_modules/next/router.js","./src/pages/chat/[roomId]/index.tsx"]}

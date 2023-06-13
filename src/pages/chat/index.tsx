@@ -3,3 +3,6 @@
 
 //users = [] ex. username, age, gender, job,
 //chats = [] ex.
+export default function Index() {
+  return <></>;
+}
