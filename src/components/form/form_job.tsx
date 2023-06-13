@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Flex, Text, Input, Button, HStack } from "@chakra-ui/react";
+import { Flex, Text, Input, Button, HStack, VStack } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 
 interface Step4Props {
@@ -20,11 +20,9 @@ function Step4({ onNext, onBack }: Step4Props) {
         alignSelf="center"
         justifyContent="center"
         alignItems="center"
-        spacing={5}
-        mr={6}
         py={10}
       >
-        <ArrowBackIcon
+        {/* <ArrowBackIcon
           boxSize={6}
           onClick={onBack}
           _hover={{
@@ -32,7 +30,7 @@ function Step4({ onNext, onBack }: Step4Props) {
           }}
           transition="0.2s"
         />{" "}
-        {/* 戻るアイコン */}
+        戻るアイコン */}
         <Text fontSize="2xl" fontWeight="bold">
           あなたの肩書きは？
         </Text>
@@ -50,19 +48,34 @@ function Step4({ onNext, onBack }: Step4Props) {
         bg="white.200"
         _hover={{ bg: "gray.100" }}
       />
-      <Button
-        onClick={handleButtonClick}
-        w="280px"
-        bg="red.300"
-        color="white"
-        _hover={{
-          bg: "red.200",
-          transform: "translateY(5px)", // マウスホバー時に少し下に移動
-        }}
-        transition="0.2s" // トランジション効果を追加
-      >
-        次へ
-      </Button>
+      <VStack spacing={3}>
+        <Button
+          onClick={handleButtonClick}
+          w="280px"
+          bg="red.300"
+          color="white"
+          _hover={{
+            bg: "red.200",
+            transform: "translateY(5px)", // マウスホバー時に少し下に移動
+          }}
+          transition="0.2s" // トランジション効果を追加
+        >
+          チャット画面に進む
+        </Button>
+        <Button
+          onClick={onBack}
+          w="280px"
+          bg="gray.500"
+          color="white"
+          _hover={{
+            bg: "gray",
+            transform: "translateY(5px)", // マウスホバー時に少し下に移動
+          }}
+          transition="0.2s" // トランジション効果を追加
+        >
+          戻る
+        </Button>
+      </VStack>
     </Flex>
   );
 }

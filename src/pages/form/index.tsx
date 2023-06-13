@@ -6,29 +6,11 @@ import Step2 from "@/components/form/form_name";
 import Step3 from "@/components/form/form_age";
 import Step4 from "@/components/form/form_job";
 
-import { CSSTransition, TransitionGroup } from "react-transition-group";
+// import { CSSTransition, TransitionGroup } from "react-transition-group";
+import { AnimatePresence, motion } from "framer-motion";
 import styled from "@emotion/styled";
 
-const AnimationContainer = styled.div`
-  .slide-enter {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  .slide-enter-active {
-    opacity: 1;
-    transform: translateX(0);
-    transition: opacity 1s, transform 0.7s; // 1s（1秒）に変更
-  }
-  .slide-exit {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  .slide-exit-active {
-    opacity: 0;
-    transform: translateX(-100%);
-    transition: opacity 1s, transform 0.5s; // 1s（1秒）に変更
-  }
-`;
+const MotionBox = motion(Box);
 
 function Survey() {
   const [step, setStep] = useState(1);
@@ -104,13 +86,24 @@ function Survey() {
   const currentStep = getCurrentStep(step);
 
   return (
-    <AnimationContainer>
-      <TransitionGroup>
-        <CSSTransition key={currentStep.key} timeout={500} classNames="slide">
-          {currentStep.component}
-        </CSSTransition>
-      </TransitionGroup>
-    </AnimationContainer>
+    <Box>
+      {/* //{" "} */}
+      {/* <AnimationContainer> */}
+      {/* <TransitionGroup>
+        <CSSTransition key={currentStep.key} timeout={300} classNames="slide"> */}
+      <MotionBox
+        key={step}
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -50 }}
+        transition={{ duration: 0.6 }}
+      >
+        {currentStep.component}
+      </MotionBox>
+      {/* </CSSTransition> */}
+      {/* </TransitionGroup> */}
+      {/* </AnimationContainer> */}
+    </Box>
   );
 }
 
