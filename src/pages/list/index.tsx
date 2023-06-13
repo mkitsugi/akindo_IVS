@@ -10,9 +10,10 @@ import {
   InputGroup,
   InputLeftElement,
   Heading,
+  Icon,
   Badge,
 } from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
+import { SearchIcon, CheckCircleIcon } from "@chakra-ui/icons";
 import { NextPage } from "next";
 
 interface Chat {
@@ -67,7 +68,11 @@ const ChatPage: NextPage = () => {
             <Avatar src={chat.avatar} />
             <Box ml={4} flex={1}>
               <Flex justify="space-between">
-                <Text fontWeight="bold">{chat.username}</Text>
+                <Flex align="center">
+                  <Text fontWeight="bold">{chat.username}</Text>
+                  <CheckCircleIcon color="blue.400" ml={2} />{" "}
+                  {/* Icon added here */}
+                </Flex>
                 <Text color="gray.500">{chat.lastMessageTime}</Text>
               </Flex>
               <Flex justify="space-between" pt={1}>
