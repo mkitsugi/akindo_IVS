@@ -80,7 +80,7 @@ export default function Home() {
         height="100vh"
       >
         <Heading as="h1" size="3xl" color="black">
-          Welcome to Osekka.ai!
+          Welcome to Osekk.ai!
         </Heading>
 
         <Text mt={4} fontSize="xl" color="black">
