@@ -66,11 +66,6 @@ function Survey() {
           ),
           key: "step2",
         };
-      // Assuming you have Step3 and Step4 components
-      // case 3:
-      //   return <Step3 onNext={handleNext} />;
-      // case 4:
-      //   return <Step4 onNext={handleNext} />;
       default:
         return {
           component: (
@@ -87,10 +82,6 @@ function Survey() {
 
   return (
     <Box>
-      {/* //{" "} */}
-      {/* <AnimationContainer> */}
-      {/* <TransitionGroup>
-        <CSSTransition key={currentStep.key} timeout={300} classNames="slide"> */}
       <MotionBox
         key={step}
         initial={{ opacity: 0, y: 50 }}
@@ -100,9 +91,6 @@ function Survey() {
       >
         {currentStep.component}
       </MotionBox>
-      {/* </CSSTransition> */}
-      {/* </TransitionGroup> */}
-      {/* </AnimationContainer> */}
     </Box>
   );
 }
