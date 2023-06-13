@@ -22,7 +22,7 @@ const Index = () => {
   // Todo ここでreceiverIdからuserInfoを取得する
   const userInfo = getUser(receiverId);
 
-  // Todo ここでroomIdからmessageを取得する
+  // Todo ここでroomIdからmessageを取得する。
   const messages = getChats(roomId);
 
   // Todo AIの最初のメッセージ
