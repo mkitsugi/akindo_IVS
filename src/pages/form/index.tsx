@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Box } from "@chakra-ui/react";
 
-import Step1 from "@/components/form_gender";
-import Step2 from "@/components/form_name";
-import Step3 from "@/components/form_age";
-import Step4 from "@/components/form_job";
+import Step1 from "@/components/form/form_gender";
+import Step2 from "@/components/form/form_name";
+import Step3 from "@/components/form/form_age";
+import Step4 from "@/components/form/form_job";
 
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import styled from "@emotion/styled";
