@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Flex, Text, Input, Button, HStack, VStack } from "@chakra-ui/react";
-import { ArrowBackIcon } from "@chakra-ui/icons";
+import Link from "next/link";
 
 interface Step4Props {
   onNext: (nickname: string) => void;
@@ -49,19 +49,20 @@ function Step4({ onNext, onBack }: Step4Props) {
         _hover={{ bg: "gray.100" }}
       />
       <VStack spacing={3}>
-        <Button
-          onClick={handleButtonClick}
-          w="280px"
-          bg="red.300"
-          color="white"
-          _hover={{
-            bg: "red.200",
-            transform: "translateY(5px)", // マウスホバー時に少し下に移動
-          }}
-          transition="0.2s" // トランジション効果を追加
-        >
-          チャット画面に進む
-        </Button>
+        <Link href="/list" passHref>
+          <Button
+            w="280px"
+            bg="red.300"
+            color="white"
+            _hover={{
+              bg: "red.200",
+              transform: "translateY(5px)", // マウスホバー時に少し下に移動
+            }}
+            transition="0.2s" // トランジション効果を追加
+          >
+            チャット画面に進む
+          </Button>
+        </Link>
         <Button
           onClick={onBack}
           w="280px"
