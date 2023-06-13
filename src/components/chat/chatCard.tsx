@@ -26,6 +26,7 @@ export function ChatCard(props: PropsType): JSX.Element {
       as={NextLink}
       href={`/chat/${lastChat.chatRoomId}`}
       textDecoration={"none"}
+      _hover={{ textDecoration: "none" }}
     >
       <Flex
         alignItems={"center"}
