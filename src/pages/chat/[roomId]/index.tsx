@@ -1,4 +1,4 @@
-import { Flex, Input, Spacer, Text } from "@chakra-ui/react";
+import { Flex, Input, Spacer, Text, Box, Container } from "@chakra-ui/react";
 import { ChevronLeftIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { BiPaperPlane } from "react-icons/bi";
 
@@ -46,26 +46,22 @@ const Index = () => {
   };
 
   return (
-    <Flex direction={"column"} py="2rem" minH={"800px"}>
-      <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem">
-        <Text
-          onClick={() => {
-            router.back();
-          }}
-        >
+    <Flex direction={"column"} py="2rem" minH={"100vh"}>
+      <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem">
+        <Box onClick={() => { router.back(); }}>
           <ChevronLeftIcon fontSize={"40px"} />
-        </Text>
-
-        <Text fontSize={"20px"} fontWeight={"semibold"}>
-          {userInfo.userName}
-        </Text>
-
-        <Text fontWeight={"bold"}>
-          <HamburgerIcon />
-        </Text>
+        </Box>
+        <Box>
+          <Text fontSize={"20px"} fontWeight={"semibold"}>
+            {userInfo.userName}
+          </Text>
+        </Box>
+        <Box>
+          <HamburgerIcon fontSize={"28px"} />
+        </Box>
       </Flex>
 
-      <Flex direction={"column"} gap={7} mt={"2rem"}>
+      <Flex direction={"column"} gap={5} my={"1rem"} overflowY="scroll" h="75vh" >
         <Message key={message.chatId} chat={message} isSender={true} />
         {messages.map((message) => {
           return <Message key={message.chatId} chat={message} />;
@@ -74,28 +70,42 @@ const Index = () => {
 
       <Spacer />
 
-      <Flex gap={"5"} mx="1rem">
-        <Input
-          value={text}
-          onChange={(e) => {
-            setText(e.target.value);
-          }}
-          bgColor={"white"}
-        />
-        <Text
-          cursor={"pointer"}
-          w={"50px"}
-          bgColor={"#EF7C76"}
-          borderRadius={"full"}
-          color={"white"}
-          pt=".3rem"
-          pl=".4rem"
-          shadow={"sm"}
-          onClick={handleSubmit}
+      <Container maxW="95%" p={10} padding="0">
+        <Flex 
+            gap={2}
+            p={3}
+            alignItems="center"
+            bgColor="white"
+            borderRadius="lg"
         >
-          <BiPaperPlane size={"28px"} />
-        </Text>
-      </Flex>
+            <Input
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+              }}
+              placeholder="メッセージを入力してください..."
+              border="none"
+            />
+            <Box
+              as="button"
+              cursor="pointer"
+              w="45px"
+              h="40px"
+              bgColor="#EF7C76"
+              borderRadius="full"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              onClick={handleSubmit}
+              _hover={{ bgColor: "#dd6b63" }}
+              _active={{
+                transform: "scale(0.95)",
+              }}
+            >
+              <BiPaperPlane color="white" size="20px" />
+            </Box>
+        </Flex>
+      </Container>
     </Flex>
   );
 };
