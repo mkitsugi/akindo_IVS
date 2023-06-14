@@ -1,5 +1,5 @@
 import { ChatType } from "@/types/chat/chatType";
-import { demoMessage, demoMessage2 } from "./demoMessage";
+import { demoMessage, demoMessage2 } from "@/components/mock/demoMessage";
 
 export function createChat(chat: Omit<ChatType, "createdAt">): ChatType {
   // Todo chatを作成する. azureに保存する
