@@ -14,12 +14,15 @@ import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
 import { getChat } from "@/components/models/chat";
 
+import { UserType } from "@/types/user/userType";
+
 const ChatPage: NextPage = () => {
   // Todo ここでmessageを取得する
   const aiInfo = getAI("1");
   const userInfo = getUser("1");
   const allMessages = [getChat("1")];
   const unreadMessages = 2;
+
 
   return (
     <Box p={4} pt={10}>

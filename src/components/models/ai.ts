@@ -6,7 +6,7 @@ export function getAI(id: string): AIType {
   return {
     id,
     userName: "初音みゆ",
-    pfp: "images/1.png",
+    pfp: "images/8.png",
     isAI: true,
   };
 }

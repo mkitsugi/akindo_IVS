@@ -17,7 +17,10 @@ export function Message(props: PropsType): JSX.Element {
 
   return (
     <Flex gap={5} mx={"1rem"} direction={isSender ? "row-reverse" : "row"} alignItems="center">
-      <Avatar src={'/' + userInfo.pfp} size={"sm"} />
+      {props.isSender && (
+        <Avatar src={'/' + userInfo.pfp} size={"sm"} />
+      )}
+      
       <Box 
         p={2}
         bgColor={isSender ? "#EF7C76" : "white"} 

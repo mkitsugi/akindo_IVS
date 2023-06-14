@@ -2,16 +2,25 @@ import { useState } from "react";
 import { Flex, Text, Input, Button, HStack, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 
+type SurveyData = {
+  gender?: string;
+  name?: string;
+  age?: number;
+  job?: string;
+};
+
 interface Step4Props {
-  onNext: (nickname: string) => void;
+  onNext: (data: SurveyData) => void;
   onBack: () => void;
 }
 
 function Step4({ onNext, onBack }: Step4Props) {
-  const [nickname, setNickname] = useState("");
+  const [job, setjob] = useState("");
+
+
 
   const handleButtonClick = () => {
-    onNext(nickname);
+    onNext({job : job});
   };
 
   return (
@@ -37,8 +46,8 @@ function Step4({ onNext, onBack }: Step4Props) {
       </HStack>
       <Input
         type="text"
-        value={nickname}
-        onChange={(e) => setNickname(e.target.value)}
+        value={job}
+        onChange={(e) => setjob(e.target.value)}
         placeholder="職業/肩書きを入力"
         mb={10}
         w="280px"
@@ -49,11 +58,12 @@ function Step4({ onNext, onBack }: Step4Props) {
         _hover={{ bg: "gray.100" }}
       />
       <VStack spacing={3}>
-        <Link href="/list" passHref>
+        {/* <Link href="/list" passHref> */}
           <Button
             w="280px"
             bg="red.300"
             color="white"
+            onClick={handleButtonClick}
             _hover={{
               bg: "red.200",
               transform: "translateY(5px)", // マウスホバー時に少し下に移動
@@ -62,7 +72,7 @@ function Step4({ onNext, onBack }: Step4Props) {
           >
             チャット画面に進む
           </Button>
-        </Link>
+        {/* </Link> */}
         <Button
           onClick={onBack}
           w="280px"

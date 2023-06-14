@@ -1,12 +1,19 @@
 import { Flex, Text, Button } from "@chakra-ui/react";
 
+type SurveyData = {
+  gender?: string;
+  name?: string;
+  age?: number;
+  job?: string;
+};
+
 interface Step1Props {
-  onNext: (selectedGender: string) => void;
+  onNext: (data : SurveyData) => void;
 }
 
 function Step1({ onNext }: Step1Props) {
   const handleButtonClick = (selectedGender: string) => {
-    onNext(selectedGender);
+    onNext({ gender: selectedGender });
   };
 
   return (

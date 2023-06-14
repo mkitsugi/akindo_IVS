@@ -14,7 +14,7 @@ export function getUser(id: string): UserType {
     id,
     userName: "あいこ",
     age: 20,
-    pfp: "images/3.png",
+    pfp: "images/5.png",
     job: "学生",
     createdAt: "1686582000000",
   };

@@ -24,7 +24,7 @@ const Index = () => {
   const [messages, setMessages] = useState<Array<ChatType>>(getChats(roomId));
 
   // Todo ここでreceiverIdからuserInfoを取得する
-  const userInfo = getUser("2");
+  const userInfo = getUser("1");
   const aiInfo = getAI("1");
 
   // Todo AIの最初のメッセージ
@@ -32,6 +32,9 @@ const Index = () => {
 
   const handleSubmit = async () => {
     try {
+
+      // Clear the input field
+      setText('');
 
       console.log("userInfoId",userInfo.id)
       console.log("recId",receiverId)
@@ -61,8 +64,7 @@ const Index = () => {
       createChat(aiChatInfo);
       setMessages([...messages, chatInfo, aiChatInfo]);  // メッセージ配列に新しいAIメッセージを追加
   
-      // Clear the input field
-      setText('');
+     
     } catch (e) {
       console.error(e);
     }
@@ -70,7 +72,7 @@ const Index = () => {
 
   const sendToAI = async (message: string) => {
     try {
-      const response = await axios.post('/api/chat', { message });
+      const response = await axios.post('/api/chat_gptResponse', { message });
       console.log('API Response:', response);  // APIのレスポンスを確認
       return response.data;
     } catch (e) {
@@ -79,7 +81,7 @@ const Index = () => {
   };
 
   return (
-    <Flex direction={"column"} py="1.5rem" minH={"100vh"} maxH={"100vh"} overflow={"hidden"}>
+    <Flex direction={"column"} py="1rem" minH={"100vh"} maxH={"100vh"} overflow={"hidden"}>
       <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem">
         <Box onClick={() => { router.back(); }}>
           <ChevronLeftIcon fontSize={"40px"} />
@@ -94,7 +96,7 @@ const Index = () => {
         </Box>
       </Flex>
 
-      <Flex direction={"column"} gap={5} my={"0rem"} overflowY="scroll" flexGrow={1} >
+      <Flex direction={"column"} gap={5} mt={"0rem"} mb={"1rem"} overflowY="scroll" flexGrow={1} >
         {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
         {messages.map((message) => {
           const isUserMessage = message.senderId !== userInfo.id;  // Check if the message is sent by the user

@@ -13,8 +13,15 @@ import {
   VStack,
 } from "@chakra-ui/react";
 
+type SurveyData = {
+  gender?: string;
+  name?: string;
+  age?: number;
+  job?: string;
+};
+
 interface Step3Props {
-  onNext: (age: number) => void;
+  onNext: (data: SurveyData) => void;
   onBack: () => void;
 }
 
@@ -22,7 +29,7 @@ function Step3({ onNext, onBack }: Step3Props) {
   const [age, setAge] = useState(19);
 
   const handleButtonClick = () => {
-    onNext(age);
+    onNext({age : age});
   };
 
   return (
