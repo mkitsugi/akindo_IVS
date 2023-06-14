@@ -10,13 +10,15 @@ import {
 import { SearchIcon } from "@chakra-ui/icons";
 import { NextPage } from "next";
 import { ChatCard } from "@/components/chat/chatCard";
+import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
 import { getChat } from "@/components/models/chat";
 
 const ChatPage: NextPage = () => {
   // Todo ここでmessageを取得する
+  const aiInfo = getAI("1");
   const userInfo = getUser("1");
-  const allMessages = [getChat("1"), getChat("2")];
+  const allMessages = [getChat("1")];
   const unreadMessages = 2;
 
   return (
@@ -37,6 +39,17 @@ const ChatPage: NextPage = () => {
       </InputGroup>
 
       <VStack spacing={4} divider={<Box h="2px" bg="gray.200" />}>
+        {/* AI用のチャット */}
+      {allMessages.map((chat, i) => (
+          <ChatCard
+            key={chat.chatId}
+            userInfo={aiInfo}
+            lastChat={chat}
+            unreadMessages={unreadMessages}
+          />
+        ))}
+
+        {/* ユーザー用のチャット */}
         {allMessages.map((chat, i) => (
           <ChatCard
             key={chat.chatId}
