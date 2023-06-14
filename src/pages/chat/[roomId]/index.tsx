@@ -1,7 +1,7 @@
 import { Flex, Input, Spacer, Text, Box, Container } from "@chakra-ui/react";
 import { ChevronLeftIcon, HamburgerIcon } from "@chakra-ui/icons";
 import { BiPaperPlane } from "react-icons/bi";
-
+import axios from 'axios';
 import { useRouter } from "next/router";
 import { getUser } from "@/components/models/user";
 import { createChat, getChat, getChats } from "@/components/models/chat";
@@ -29,8 +29,8 @@ const Index = () => {
   const message = getChat("chatId");
 
   const handleSubmit = async () => {
-    // Todo ここで送信処理をする
     try {
+      // User message
       const chatInfo: ChatType = {
         chatId: uuid(),
         chatRoomId: roomId,
@@ -40,9 +40,29 @@ const Index = () => {
         createdAt: new Date().getTime(),
       };
       createChat(chatInfo);
+  
+      // AI response
+      const aiMessage = await sendToAI(text);
+      const aiChatInfo: ChatType = {
+        chatId: uuid(),
+        chatRoomId: roomId,
+        senderId: receiverId,  // AI is considered as the receiver
+        receiverId: userInfo.id,
+        message: aiMessage,
+        createdAt: new Date().getTime(),
+      };
+      createChat(aiChatInfo);
+  
+      // Clear the input field
+      setText('');
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const sendToAI = async (message: string) => {
+    const response = await axios.post('/api/chat', { message });
+    return response.data;
   };
 
   return (
