@@ -13,9 +13,11 @@ export function Message(props: PropsType): JSX.Element {
   );
   const isSender = userInfo.id === props.chat.senderId;
 
+  console.log(userInfo);
+
   return (
     <Flex gap={5} mx={"1rem"} direction={isSender ? "row-reverse" : "row"} alignItems="center">
-      <Avatar src={userInfo.pfp} size={"sm"} />
+      <Avatar src={'/' + userInfo.pfp} size={"sm"} />
       <Box 
         p={2}
         bgColor={isSender ? "#EF7C76" : "white"} 
