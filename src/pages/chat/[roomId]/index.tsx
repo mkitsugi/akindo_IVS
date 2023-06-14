@@ -5,7 +5,7 @@ import axios from 'axios';
 import { useRouter } from "next/router";
 import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
-import { createChat, getChat, getChats } from "@/components/models/chat";
+import { createChat, getChats } from "@/components/models/chat";
 import { Message } from "@/components/chat/message";
 import { useState } from "react";
 import { ChatType } from "@/types/chat/chatType";
@@ -28,7 +28,7 @@ const Index = () => {
   const aiInfo = getAI("1");
 
   // Todo AIの最初のメッセージ
-  const message = getChat("chatId");
+  // const message = getChat("chatId");
 
   const handleSubmit = async () => {
     try {
@@ -79,7 +79,7 @@ const Index = () => {
   };
 
   return (
-    <Flex direction={"column"} py="2rem" minH={"100vh"}>
+    <Flex direction={"column"} py="1.5rem" minH={"100vh"} maxH={"100vh"} overflow={"hidden"}>
       <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem">
         <Box onClick={() => { router.back(); }}>
           <ChevronLeftIcon fontSize={"40px"} />
@@ -94,8 +94,8 @@ const Index = () => {
         </Box>
       </Flex>
 
-      <Flex direction={"column"} gap={5} my={"1rem"} overflowY="scroll" h="75vh" >
-        <Message key={message.chatId} chat={message} isSender={true} />
+      <Flex direction={"column"} gap={5} my={"0rem"} overflowY="scroll" flexGrow={1} >
+        {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
         {messages.map((message) => {
           const isUserMessage = message.senderId !== userInfo.id;  // Check if the message is sent by the user
           return <Message key={message.chatId} chat={message} isSender={isUserMessage} />;
