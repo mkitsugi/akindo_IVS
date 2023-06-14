@@ -59,16 +59,17 @@ export function ChatCard(props: PropsType): JSX.Element {
             <Spacer />
             {props.unreadMessages > 0 && (
               <Badge
-                colorScheme="red"
+                colorScheme="pink"
+                color="black"
                 borderRadius="full"
                 width="24px"
                 height="24px"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-              >
-                {props.unreadMessages}
-              </Badge>
+            >
+              {props.unreadMessages}
+            </Badge>
             )}
           </Flex>
         </Flex>
