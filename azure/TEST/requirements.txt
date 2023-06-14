@@ -1,0 +1,4 @@
+# Do not include azure-functions-worker as it may conflict with the Azure Functions platform
+openai==0.27.8
+python-dotenv==0.19.2
+azure-functions==1.14.1b3
