@@ -1,4 +1,5 @@
 import { UserType } from "@/types/user/userType";
+import { AIType } from "@/types/AI/aiType";
 import { Avatar, Flex, Spacer, Text, Badge, Link } from "@chakra-ui/react";
 import { SearchIcon, CheckCircleIcon } from "@chakra-ui/icons";
 import { ChatType } from "@/types/chat/chatType";
@@ -6,7 +7,7 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 
 type PropsType = {
-  userInfo: UserType;
+  userInfo: UserType | AIType;
   lastChat: ChatType;
   unreadMessages: number;
 };
@@ -46,7 +47,7 @@ export function ChatCard(props: PropsType): JSX.Element {
         <Flex direction={"column"} gap={1}>
           <Flex alignItems={"center"} minW={"270px"}>
             <Text fontWeight={"bold"}>{userInfo.userName}</Text>
-            <CheckCircleIcon color="blue.400" ml={2} />
+            {(userInfo as AIType).isAI && <CheckCircleIcon color="blue.400" ml={2} />}
             <Spacer />
             <Text color="gray.500">19:35</Text>
           </Flex>

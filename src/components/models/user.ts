@@ -12,9 +12,9 @@ export function getUser(id: string): UserType {
   // Todo idを元にユーザーを取得する
   return {
     id,
-    userName: "初音みゆ",
+    userName: "あいこ",
     age: 20,
-    pfp: "images/1.png",
+    pfp: "images/3.png",
     job: "学生",
     createdAt: "1686582000000",
   };
