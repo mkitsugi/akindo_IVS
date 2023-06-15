@@ -11,12 +11,13 @@ import { useState } from "react";
 import { ChatType } from "@/types/chat/chatType";
 import { uuid } from "uuidv4";
 import { useWindowHeight } from '@/hooks/useWindow';
-import React from "react";
 
 const Index = () => {
   const router = useRouter();
 
   const windowHeight = useWindowHeight();
+
+  const [isInputFocused, setInputFocus] = useState(false);
 
   const roomId =
     typeof router.query.roomId === "string" ? router.query.roomId : "";
@@ -32,14 +33,6 @@ const Index = () => {
   // Todo ここでreceiverIdからuserInfoを取得する
   const userInfo = getUser("1");
   const aiInfo = getAI("1");
-
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const handleFocus = () => {
-    if(inputRef.current) {
-      inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
-  };
-
 
   // Todo AIの最初のメッセージ
   // const message = getChat("chatId");
@@ -96,7 +89,7 @@ const Index = () => {
 
   return (
     <Flex direction={"column"} py="1rem" h={`${windowHeight}px`} overflow={"hidden"}>
-      <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem">
+      <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem" overflow={isInputFocused ? 'hidden' : 'auto'}>
         <Box onClick={() => { router.back(); }}>
           <ChevronLeftIcon fontSize={"40px"} />
         </Box>
@@ -110,7 +103,7 @@ const Index = () => {
         </Box>
       </Flex>
 
-      <Flex direction={"column"} gap={5} mt={"0rem"} mb={"1rem"} overflowY="scroll" flexGrow={1} >
+      <Flex direction={"column"} gap={5} mt={"0rem"} mb={"1rem"} overflowY="scroll" flexGrow={1} overflow={isInputFocused ? 'hidden' : 'auto'}>
         {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
         {messages.map((message) => {
           const isUserMessage = message.senderId !== userInfo.id;  // Check if the message is sent by the user
@@ -135,7 +128,8 @@ const Index = () => {
               }}
               placeholder="メッセージを入力してください..."
               border="none"
-              ref={inputRef} onFocus={handleFocus}
+              onFocus={() => setInputFocus(true)}
+              onBlur={() => setInputFocus(false)}
             />
             <Box
               as="button"
