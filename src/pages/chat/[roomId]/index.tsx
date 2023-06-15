@@ -11,6 +11,7 @@ import { useState } from "react";
 import { ChatType } from "@/types/chat/chatType";
 import { uuid } from "uuidv4";
 import { useWindowHeight } from '@/hooks/useWindow';
+import React from "react";
 
 const Index = () => {
   const router = useRouter();
@@ -31,6 +32,14 @@ const Index = () => {
   // Todo ここでreceiverIdからuserInfoを取得する
   const userInfo = getUser("1");
   const aiInfo = getAI("1");
+
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const handleFocus = () => {
+    if(inputRef.current) {
+      inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  };
+
 
   // Todo AIの最初のメッセージ
   // const message = getChat("chatId");
@@ -126,6 +135,7 @@ const Index = () => {
               }}
               placeholder="メッセージを入力してください..."
               border="none"
+              ref={inputRef} onFocus={handleFocus}
             />
             <Box
               as="button"
