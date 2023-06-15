@@ -14,11 +14,13 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
-import { createChat, getChats } from "@/components/models/chat";
+import { createChat, getChatRooms, getChats } from "@/components/models/chat";
 import { Message } from "@/components/chat/message";
 import { ChatType } from "@/types/chat/chatType";
 import { uuid } from "uuidv4";
 import { useWindowHeight } from "@/hooks/useWindow";
+import { ChatRoomType } from "@/types/chat/chatRoomType";
+import { UserType } from "@/types/user/userType";
 
 const Index = () => {
   const router = useRouter();
@@ -30,16 +32,17 @@ const Index = () => {
   const roomId =
     typeof router.query.roomId === "string" ? router.query.roomId : "";
 
-  const receiverId =
-    typeof router.query.receiverId === "string" ? router.query.receiverId : "";
+  // const receiverId =
+  //   typeof router.query.receiverId === "string" ? router.query.receiverId : "";
 
   const [text, setText] = useState<string>("");
+  const [userInfo, setUserInfo] = useState<UserType | null>(null);
+  const [chatrooms, setChatrooms] = useState<ChatRoomType[]>([]);
 
   // メッセージ配列の状態を管理
-  const [messages, setMessages] = useState<Array<ChatType>>(getChats(roomId));
+  const [messages, setMessages] = useState<ChatType[]>();
 
   // Todo ここでreceiverIdからuserInfoを取得する
-  const userInfo = getUser("1");
   const aiInfo = getAI("1");
 
   //APIレスポンス待ち
@@ -62,6 +65,33 @@ const Index = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const data = localStorage.getItem("user");
+    // データがnullではない場合、それをパースします
+    if (data !== null) {
+      setUserInfo(JSON.parse(data));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!userInfo) return;
+    getChatRooms(userInfo.id).then(setChatrooms);
+  }, [userInfo]);
+
+  useEffect(() => {
+    if (!userInfo || !chatrooms.length) return;
+    getChats(chatrooms).then((chatArrays) => {
+      // Flatten the array of chat arrays into a single array
+      const allChats = chatArrays.reduce(
+        (acc, chats) => [...acc, ...chats],
+        []
+      );
+      // Sort the chats by createdAt timestamp in descending order
+      allChats.sort((a, b) => b.createdAt - a.createdAt);
+      setMessages(allChats);
+    });
+  }, [userInfo, chatrooms]);
+
+  useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
@@ -82,30 +112,35 @@ const Index = () => {
         setIsLoading(true);
       }, 1500);
 
+      if (!userInfo) return;
+
       // User message
       const chatInfo: ChatType = {
         chatId: uuid(),
         chatRoomId: roomId,
-        senderId: userInfo.id,
-        receiverId: receiverId,
+        user_id: userInfo.id,
         message: text,
         createdAt: new Date().getTime(),
       };
+
+      console.log("chatInfo", chatInfo);
+
       createChat(chatInfo);
-      setMessages([...messages, chatInfo]); // メッセージ配列に新しいユーザーメッセージを追加
+      const _messages = messages ? [...messages, chatInfo] : [chatInfo];
+      setMessages(_messages); // メッセージ配列に新しいユーザーメッセージを追加
 
       // AI response
       const aiMessage = await sendToAI(text);
       const aiChatInfo: ChatType = {
         chatId: uuid(),
         chatRoomId: roomId,
-        senderId: "20", // AI is considered as the receiver
-        receiverId: userInfo.id,
+        user_id: "ai",
         message: aiMessage,
         createdAt: new Date().getTime(),
       };
       createChat(aiChatInfo);
-      setMessages([...messages, chatInfo, aiChatInfo]); // メッセージ配列に新しいAIメッセージを追加
+      const _messages2 = messages ? [...messages, aiChatInfo] : [aiChatInfo];
+      setMessages(_messages2); // メッセージ配列に新しいAIメッセージを追加
 
       // ローディング状態を無効にする
       setIsLoading(false);
@@ -124,6 +159,8 @@ const Index = () => {
       console.error("API Error:", e); // APIからのエラーを確認
     }
   };
+
+  if (!userInfo) return <></>;
 
   return (
     <Flex
@@ -165,8 +202,8 @@ const Index = () => {
         ref={messagesEndRef}
       >
         {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
-        {messages.map((message) => {
-          const isUserMessage = message.senderId !== userInfo.id; // Check if the message is sent by the user
+        {messages?.map((message) => {
+          const isUserMessage = message.user_id !== userInfo.id; // Check if the message is sent by the user
           return (
             <Message
               key={message.chatId}
