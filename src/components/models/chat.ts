@@ -1,5 +1,8 @@
 import { ChatType } from "@/types/chat/chatType";
 import { demoMessage } from "@/components/mock/demoMessage";
+import { ChatRoomType } from "@/types/chat/chatRoomType";
+import axios from "axios";
+import { useState } from "react";
 
 export function createChat(chat: Omit<ChatType, "createdAt">): ChatType {
   // Todo chatを作成する. azureに保存する
@@ -21,7 +24,12 @@ export function getChat(id: string): ChatType {
   };
 }
 
-export function getChats(chatRoomId: string): ChatType[] {
-  // Todo chatRoomIdを元にチャットを取得する
-  return [demoMessage];
+export function getChats(userId: string): ChatRoomType[] {
+  // Todo userIdを元にチャットを取得する
+  let data: ChatRoomType[] = [];
+  axios.get("/api/getAllMyChatRoom", { params: { userId } }).then((res) => {
+    console.log(res.data);
+    data = res.data;
+  });
+  return data;
 }

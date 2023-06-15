@@ -1,5 +1,5 @@
 // pages/chat/index.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -16,21 +16,28 @@ import {
   DrawerContent,
   useDisclosure,
   useTheme,
-  HStack
+  HStack,
 } from "@chakra-ui/react";
 
-import { SearchIcon, HamburgerIcon, ChevronRightIcon, ChevronDownIcon } from "@chakra-ui/icons";
+import {
+  SearchIcon,
+  HamburgerIcon,
+  ChevronRightIcon,
+  ChevronDownIcon,
+} from "@chakra-ui/icons";
 import { NextPage } from "next";
 import { ChatCard } from "@/components/chat/chatCard";
 import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
-import { getChat } from "@/components/models/chat";
-
+import { getChat, getChats } from "@/components/models/chat";
+import { UserType } from "@/types/user/userType";
 
 const ChatPage: NextPage = () => {
+  const [userInfo, setUserInfo] = useState<UserType | null>(null);
+
   // Todo ここでmessageを取得する
   const aiInfo = getAI("1");
-  const userInfo = getUser("1");
+  // const userInfo = getUser("1");
   const allMessages = [getChat("1")];
   const unreadMessages = 2; //unreadMessagesは最悪DBとは連携させない
 
@@ -41,16 +48,31 @@ const ChatPage: NextPage = () => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const handleToggle = () => setShowAdvanced(!showAdvanced);
 
+  useEffect(() => {
+    const data = localStorage.getItem("user");
+    // データがnullではない場合、それをパースします
+    if (data !== null) {
+      setUserInfo(JSON.parse(data));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!userInfo) return;
+    getChats(userInfo.id);
+  }, [userInfo]);
+
+  if (!userInfo) return <></>;
+
   return (
     <Box p={4} pt={10}>
       <VStack spacing={0}>
-      <HamburgerIcon
+        <HamburgerIcon
           aria-label="Menu"
           fontSize="28px"
           position="absolute"
           right={4}
           top={4}
-          onClick={onOpen}  // アイコンクリックでメニューバーを開く
+          onClick={onOpen} // アイコンクリックでメニューバーを開く
         />
         <Text fontSize="2xl" fontWeight="bold" px={6} mt={5}>
           あなたにメッセージ
@@ -69,13 +91,13 @@ const ChatPage: NextPage = () => {
       <VStack spacing={4} divider={<Box h="2px" bg="gray.200" />}>
         {/* AI用のチャット */}
         {allMessages.map((chat) => (
-            <ChatCard
-              key={chat.chatId}
-              userInfo={aiInfo}
-              lastChat={chat}
-              unreadMessages={unreadMessages}
-            />
-          ))}
+          <ChatCard
+            key={chat.chatId}
+            userInfo={aiInfo}
+            lastChat={chat}
+            unreadMessages={unreadMessages}
+          />
+        ))}
 
         {/* ユーザー用のチャット */}
         {allMessages.map((chat, i) => (
@@ -90,39 +112,80 @@ const ChatPage: NextPage = () => {
 
       {/* メニューバーの実装 */}
       <Slide direction="right" in={isOpen} style={{ zIndex: 10 }}>
-        <Drawer isOpen={isOpen} placement="right" onClose={onClose} >
+        <Drawer isOpen={isOpen} placement="right" onClose={onClose}>
           <DrawerOverlay />
-            <DrawerContent position="absolute" right={0} w="30vw" maxW="200px">
-              {/* メニューの内容をここに書く */}
-             
-              <VStack color="black" align="start" justify="center" h="full" pl={5} spacing={6} py={6}>
+          <DrawerContent position="absolute" right={0} w="30vw" maxW="200px">
+            {/* メニューの内容をここに書く */}
+
+            <VStack
+              color="black"
+              align="start"
+              justify="center"
+              h="full"
+              pl={5}
+              spacing={6}
+              py={6}
+            >
               <Spacer />
-                <Text fontWeight="bold" fontSize="xl">マイページへ行く</Text>
-                <Text fontWeight="bold" fontSize="xl">キャラを探す</Text>
-                <HStack flexDirection="row" alignItems="start" w="full" spacing={0}>
-                  <Button onClick={handleToggle} variant="link" m={0} _focus={{ boxShadow: "none" }} padding={0} justifyContent="flex-start">
-                      {showAdvanced ? <ChevronDownIcon boxSize={6} color="black" /> : < ChevronRightIcon boxSize={6} color="black" />}
-                  </Button>
-                  <Text fontWeight="bold" fontSize="xl">高度な機能</Text>s
-                  {/* <Spacer /> */}
-                </HStack>
-                <Collapse in={showAdvanced}>
-                  <VStack align="start" pl={5} spacing={5} >
-                    <Text fontWeight="bold" fontSize="md">キャラを作る</Text>
-                    <Text fontWeight="bold" fontSize="md">WalletConnect</Text>
-                  </VStack>
-                </Collapse>
-                <Box h="2px" w="full" bg="" my={6} />
-                <Text fontWeight="bold" fontSize="xl">設定</Text>
-                <Text fontWeight="bold" fontSize="xl">フィードバック</Text>
-                <Text fontWeight="bold" fontSize="xl">お問い合わせ</Text>
-                <Spacer />
-                <Text fontWeight="bold" fontSize="xx-small" mt="auto">©KG, Inc. All rights reserved</Text>
-              </VStack>
-            </DrawerContent>
+              <Text fontWeight="bold" fontSize="xl">
+                マイページへ行く
+              </Text>
+              <Text fontWeight="bold" fontSize="xl">
+                キャラを探す
+              </Text>
+              <HStack
+                flexDirection="row"
+                alignItems="start"
+                w="full"
+                spacing={0}
+              >
+                <Button
+                  onClick={handleToggle}
+                  variant="link"
+                  m={0}
+                  _focus={{ boxShadow: "none" }}
+                  padding={0}
+                  justifyContent="flex-start"
+                >
+                  {showAdvanced ? (
+                    <ChevronDownIcon boxSize={6} color="black" />
+                  ) : (
+                    <ChevronRightIcon boxSize={6} color="black" />
+                  )}
+                </Button>
+                <Text fontWeight="bold" fontSize="xl">
+                  高度な機能
+                </Text>
+                s{/* <Spacer /> */}
+              </HStack>
+              <Collapse in={showAdvanced}>
+                <VStack align="start" pl={5} spacing={5}>
+                  <Text fontWeight="bold" fontSize="md">
+                    キャラを作る
+                  </Text>
+                  <Text fontWeight="bold" fontSize="md">
+                    WalletConnect
+                  </Text>
+                </VStack>
+              </Collapse>
+              <Box h="2px" w="full" bg="" my={6} />
+              <Text fontWeight="bold" fontSize="xl">
+                設定
+              </Text>
+              <Text fontWeight="bold" fontSize="xl">
+                フィードバック
+              </Text>
+              <Text fontWeight="bold" fontSize="xl">
+                お問い合わせ
+              </Text>
+              <Spacer />
+              <Text fontWeight="bold" fontSize="xx-small" mt="auto">
+                ©KG, Inc. All rights reserved
+              </Text>
+            </VStack>
+          </DrawerContent>
         </Drawer>
       </Slide>
-
     </Box>
   );
 };

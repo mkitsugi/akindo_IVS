@@ -47,7 +47,9 @@ export function ChatCard(props: PropsType): JSX.Element {
         <Flex direction={"column"} gap={1}>
           <Flex alignItems={"center"} minW={"270px"}>
             <Text fontWeight={"bold"}>{userInfo.userName}</Text>
-            {(userInfo as AIType).isAI && <CheckCircleIcon color="blue.400" ml={2} />}
+            {(userInfo as AIType).isAI && (
+              <CheckCircleIcon color="blue.400" ml={2} />
+            )}
             <Spacer />
             <Text color="gray.500">19:35</Text>
           </Flex>
@@ -67,9 +69,9 @@ export function ChatCard(props: PropsType): JSX.Element {
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-            >
-              {props.unreadMessages}
-            </Badge>
+              >
+                {props.unreadMessages}
+              </Badge>
             )}
           </Flex>
         </Flex>
