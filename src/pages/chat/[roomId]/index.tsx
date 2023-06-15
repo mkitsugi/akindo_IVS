@@ -81,7 +81,7 @@ const Index = () => {
   };
 
   return (
-    <Flex direction={"column"} py="1rem" minH={"70vh"} maxH={"100vh"} overflow={"hidden"}>
+    <Flex direction={"column"} py="1rem" minH={"100vh"} maxH={"100vh"} overflow={"hidden"}>
       <Flex direction={"column"}>
         <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem">
           <Box onClick={() => { router.back(); }}>
