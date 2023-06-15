@@ -10,11 +10,16 @@ import { Message } from "@/components/chat/message";
 import { useState } from "react";
 import { ChatType } from "@/types/chat/chatType";
 import { uuid } from "uuidv4";
+import { useWindowHeight } from '@/hooks/useWindow';
 
 const Index = () => {
   const router = useRouter();
+
+  const windowHeight = useWindowHeight();
+
   const roomId =
     typeof router.query.roomId === "string" ? router.query.roomId : "";
+
   const receiverId =
     typeof router.query.receiverId === "string" ? router.query.receiverId : "";
 
@@ -81,7 +86,7 @@ const Index = () => {
   };
 
   return (
-    <Flex direction={"column"} py="1rem" h="100vh" overflow={"hidden"}>
+    <Flex direction={"column"} py="1rem" h={`${windowHeight}px`} overflow={"hidden"}>
       <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem">
         <Box onClick={() => { router.back(); }}>
           <ChevronLeftIcon fontSize={"40px"} />
