@@ -3,23 +3,24 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === "GET") {
-    const { userId } = req.query; // Use req.query instead of req.body
+    const { chatRoomId } = req.query; // Use req.query instead of req.body
 
     // Validate the incoming data
-    if (typeof userId !== "string") {
+    if (typeof chatRoomId !== "string") {
       return res.status(400).json({ error: "Invalid input data" });
     }
 
+    console.log("chat_room_id",chatRoomId);
+
     // cosmosDBからChatRoomを取得
     const { resources: chatRooms } = await cosmosClient.database
-      .container("ChatRooms")
+      .container("Chats")
       .items.query({
-        // query: "SELECT m.chatId, m.senderId, m.receiverId, m.message, m.chatRoomId, m.createdAt FROM ChatRooms c JOIN m IN c.messages WHERE m.senderId = @userId OR m.receiverId = @userId",
-        query: "SELECT * FROM ChatRooms c WHERE ARRAY_CONTAINS(c.participants_id, @userId)",
+        query: "SELECT * FROM Chats c WHERE c.chat_room_id = @chatRoomId",
         parameters: [
           {
-            name: "@userId",
-            value: userId,
+            name: "@chatRoomId",
+            value: chatRoomId,
           },
         ],
       })

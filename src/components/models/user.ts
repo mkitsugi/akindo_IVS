@@ -1,21 +1,19 @@
 import { UserType } from "@/types/user/userType";
+import axios from "axios";
 
-export function createUser(user: Omit<UserType, "createdAt">): UserType {
-  // Todo userを作成する. azureに保存する
+function mapToUserType(userData: any): UserType {
   return {
-    ...user,
-    createdAt: Date.now().toString(),
+      id: userData.id,
+      pfp: userData.imgSrc,
+      userName: userData.name,
+      age: userData.age,
+      job: userData.jobm,
+      createdAt: userData.createdAt,
   };
 }
 
-export function getUser(id: string): UserType {
-  // Todo idを元にユーザーを取得する
-  return {
-    id,
-    userName: "あいこ",
-    age: 20,
-    pfp: "images/5.png",
-    job: "学生",
-    createdAt: "1686582000000",
-  };
+export async function getUser(id: string): Promise<UserType> {
+  const response = await axios.get("/api/getOtherUserInfo", { params: { id } });
+  console.log("getUser", response.data);
+  return mapToUserType(response.data);
 }

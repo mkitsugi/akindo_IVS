@@ -28,25 +28,23 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         gender,
         job,
         name,
-        chatIds: [defaultChatId],
+        imgSrc : "",
+        createdAt: Date.now()
       });
 
     // chatsコンテナにchatroomを生成
-    const chatRoomId = uuidv4(); // ユニークなUUIDを生成する
-    const messages = [
-      {
-        chatId: uuidv4(),
-        senderId: "AI",
-        timestamp: Date.now(),
-        message: "やっほーう！",
-        receiverId: createdItem?.id,
-      },
-    ];
-
-    await cosmosClient.database.container("Chats").items.create({
-      chatRoomId,
-      messages,
+    const { resource: createdChatRoom } = await cosmosClient.database.container("ChatRooms").items.create({
+      participants_id : [createdItem?.id, "AI"],
+      createdAt : Date.now()
     });
+
+    // 生成したChatroomに最初のチャットを投稿
+    await cosmosClient.database.container("Chats").items.create({
+      chat_room_id : createdChatRoom?.id,
+      createdAt : Date.now(),
+      user_id : "AI",
+      message : "やっほー"
+    })
 
     res.status(201).json(createdItem);
   } else {

@@ -29,16 +29,18 @@ import { NextPage } from "next";
 import { ChatCard } from "@/components/chat/chatCard";
 import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
-import { getChat, getChats } from "@/components/models/chat";
+import { getChatRooms, getChats } from "@/components/models/chat";
 import { UserType } from "@/types/user/userType";
+import { ChatType } from "@/types/chat/chatType";
+import { ChatRoomType } from "@/types/chat/chatRoomType";
 
 const ChatPage: NextPage = () => {
   const [userInfo, setUserInfo] = useState<UserType | null>(null);
+  const [chatrooms, setChatrooms] = useState<ChatRoomType[]>([]);
+  const [chats, setChats] = useState<ChatType[]>([]);
+  //他のユーザー情報を格納するためのものです。
+  const [otherUsers, setOtherUsers] = useState<UserType[] | undefined>([]);
 
-  // Todo ここでmessageを取得する
-  const aiInfo = getAI("1");
-  // const userInfo = getUser("1");
-  const allMessages = [getChat("1")];
   const unreadMessages = 2; //unreadMessagesは最悪DBとは連携させない
 
   //ハンバーガーアイコンの挙動
@@ -58,8 +60,34 @@ const ChatPage: NextPage = () => {
 
   useEffect(() => {
     if (!userInfo) return;
-    getChats(userInfo.id);
+    getChatRooms(userInfo.id).then(setChatrooms);
   }, [userInfo]);
+
+  useEffect(() => {
+    if (!userInfo || !chatrooms.length) return;
+    getChats(chatrooms).then((chatArrays) => {
+      // Flatten the array of chat arrays into a single array
+      const allChats = chatArrays.reduce((acc, chats) => [...acc, ...chats], []);
+      // Sort the chats by createdAt timestamp in descending order
+      allChats.sort((a, b) => b.createdAt - a.createdAt);
+      setChats(allChats);
+    });
+  }, [userInfo, chatrooms]);
+
+  useEffect(() => {
+    if (!userInfo || !chatrooms.length) return;
+
+    const otherUserIds = chatrooms.map(room => {
+      if (room && Array.isArray(room.participants_id)) {
+        return room.participants_id.find(id => id !== userInfo.id);
+      }
+      return null;
+    }).filter(Boolean);
+
+    Promise.all(otherUserIds.map(id => id && getUser(id)))
+    .then(users => users.filter((user): user is UserType => user !== null && user !== undefined))
+    .then(setOtherUsers);
+  }, [userInfo, chatrooms]);
 
   if (!userInfo) return <></>;
 
@@ -89,25 +117,31 @@ const ChatPage: NextPage = () => {
       </InputGroup>
 
       <VStack spacing={4} divider={<Box h="2px" bg="gray.200" />}>
-        {/* AI用のチャット */}
-        {allMessages.map((chat) => (
-          <ChatCard
-            key={chat.chatId}
-            userInfo={aiInfo}
-            lastChat={chat}
-            unreadMessages={unreadMessages}
-          />
-        ))}
 
         {/* ユーザー用のチャット */}
-        {allMessages.map((chat, i) => (
+        {chatrooms.map((chatroom, i) => {
+          
+
+          console.log("111:",otherUsers);
+
+
+          const correspondingUser = otherUsers?.find(user => chatroom.participants_id.includes(user.id));
+          const chat = chats.find(chat => chat.chatRoomId === chatroom.chatroomId);
+
+          console.log("???:",correspondingUser);
+          // If no corresponding user or chat is found, don't render the ChatCard
+          if (!correspondingUser || !chat) return null;
+
+          return(
           <ChatCard
-            key={chat.chatId}
-            userInfo={userInfo}
-            lastChat={chat}
+            key={chatroom.chatroomId}
+            userInfo={correspondingUser}
+            ChatRoomInfo={chatroom}
+            lastMessage={chat.message}
             unreadMessages={unreadMessages}
           />
-        ))}
+          );
+        })}
       </VStack>
 
       {/* メニューバーの実装 */}

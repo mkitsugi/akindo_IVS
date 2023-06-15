@@ -1,6 +1,6 @@
-import { ChatType } from "./chatType";
 
 export type ChatRoomType = {
   chatroomId: string;
-  messages: ChatType[];
+  participants_id: string[],
+  createdAt: number,
 };
