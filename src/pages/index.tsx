@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Box, Container, Heading, Text, Button, Stack } from "@chakra-ui/react";
+import { Box, Container, Heading, Text, Button, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
@@ -96,7 +96,7 @@ export default function Home() {
           </Box>
         )}
 
-        <Stack
+        <VStack
           direction="row"
           spacing={4}
           align="center"
@@ -108,7 +108,13 @@ export default function Home() {
               登録に進む
             </Button>
           </Link>
-        </Stack>
+
+          <Link  href="/list" passHref>
+            <Text mt={3} color="gray"  size="sm">
+              Dev用の遷移(フォーム入力不要)
+            </Text>
+          </Link>
+        </VStack>
       </Container>
     </MotionBox>
   );
