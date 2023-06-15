@@ -53,11 +53,11 @@ const ChatPage: NextPage = () => {
           top={4}
           onClick={onOpen}  // アイコンクリックでメニューバーを開く
         />
-        <Text fontSize="2xl" fontWeight="bold" px={6}>
-          あなたに
+        <Text fontSize="2xl" fontWeight="bold" px={6} mt={5}>
+          あなたにメッセージ
         </Text>
         <Text fontSize="2xl" fontWeight="bold" px={6} mb={6}>
-          メッセージが届いています
+          が届いています
         </Text>
       </VStack>
       <InputGroup mb={6} bg="white" rounded={20}>
