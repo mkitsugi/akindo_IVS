@@ -18,14 +18,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       }
 
     // カスタム項目の追加
-    const defaultChatId = [uuidv4()];
+    const defaultChatId = uuidv4();
     
+    //cosmosDBにUserを追加
     const { resource: createdItem } = await cosmosClient.database.container('Users').items.create({
       age,
       gender,
       job,
       name,
-      defaultChatId
+      chatIds: [defaultChatId]
     })
 
     // chatsコンテナにchatroomを生成

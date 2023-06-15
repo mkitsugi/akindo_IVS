@@ -1,6 +1,6 @@
 import { Flex, Input, Spacer, Text, Box, Container, Avatar } from "@chakra-ui/react";
 import { ChevronLeftIcon, HamburgerIcon } from "@chakra-ui/icons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { BiPaperPlane } from "react-icons/bi";
 import axios from 'axios';
 import { useRouter } from "next/router";
@@ -42,12 +42,24 @@ const Index = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setDotsCount((prevCount) => (prevCount + 1) % 4); // ドットの数を4で割った余りを更新
-    }, 280); // 500ミリ秒ごとに更新
+    }, 450); // 400ミリ秒ごとに更新
   
     return () => {
       clearInterval(interval); // コンポーネントがアンマウントされた時にインターバルをクリアする
     };
   }, []);
+
+  //スクロール部分表示操作
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  };
+  
 
   const handleSubmit = async () => {
     try {
@@ -56,12 +68,11 @@ const Index = () => {
       // Clear the input field
       setText('');
 
-       // ローディング状態を有効にする
-      setIsLoading(true);
+      setTimeout(async () => {
+         // ローディング状態を有効にする
+        setIsLoading(true);
+      }, 1500);
 
-      console.log("userInfoId",userInfo.id)
-      console.log("recId",receiverId)
-      console.log("AIInfo",aiInfo.id)
       // User message
       const chatInfo: ChatType = {
         chatId: uuid(),
@@ -122,7 +133,7 @@ const Index = () => {
         </Box>
       </Flex>
 
-      <Flex direction={"column"} gap={5} mt={"0rem"} mb={"1rem"} overflowY="scroll" flexGrow={1} >
+      <Flex direction={"column"} gap={5} mt={"0rem"} mb={"1rem"} overflowY="scroll" flexGrow={1} ref={messagesEndRef}>
         {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
         {messages.map((message) => {
           const isUserMessage = message.senderId !== userInfo.id;  // Check if the message is sent by the user
