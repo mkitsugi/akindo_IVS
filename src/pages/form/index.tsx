@@ -42,7 +42,11 @@ function Survey() {
         axios.post("/api/user_create", surveyData)
         .then((response) => {
           console.log(response.data)
+
+          //生成情報をローカル環境で保持する処理
           localStorage.setItem("user", JSON.stringify(response.data))
+
+
           router.push("/list")
         })
         .catch((error) => {
