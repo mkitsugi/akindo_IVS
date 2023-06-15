@@ -1,5 +1,6 @@
-import { Flex, Input, Spacer, Text, Box, Container } from "@chakra-ui/react";
+import { Flex, Input, Spacer, Text, Box, Container, Avatar } from "@chakra-ui/react";
 import { ChevronLeftIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { useState, useEffect } from "react";
 import { BiPaperPlane } from "react-icons/bi";
 import axios from 'axios';
 import { useRouter } from "next/router";
@@ -7,7 +8,6 @@ import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
 import { createChat, getChats } from "@/components/models/chat";
 import { Message } from "@/components/chat/message";
-import { useState } from "react";
 import { ChatType } from "@/types/chat/chatType";
 import { uuid } from "uuidv4";
 import { useWindowHeight } from '@/hooks/useWindow';
@@ -34,14 +34,30 @@ const Index = () => {
   const userInfo = getUser("1");
   const aiInfo = getAI("1");
 
-  // Todo AIの最初のメッセージ
-  // const message = getChat("chatId");
+  //APIレスポンス待ち
+  const [isLoading, setIsLoading] = useState(false);
+
+  //カウンター
+  const [dotsCount, setDotsCount] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDotsCount((prevCount) => (prevCount + 1) % 4); // ドットの数を4で割った余りを更新
+    }, 280); // 500ミリ秒ごとに更新
+  
+    return () => {
+      clearInterval(interval); // コンポーネントがアンマウントされた時にインターバルをクリアする
+    };
+  }, []);
 
   const handleSubmit = async () => {
     try {
 
+      
       // Clear the input field
       setText('');
+
+       // ローディング状態を有効にする
+      setIsLoading(true);
 
       console.log("userInfoId",userInfo.id)
       console.log("recId",receiverId)
@@ -70,10 +86,13 @@ const Index = () => {
       };
       createChat(aiChatInfo);
       setMessages([...messages, chatInfo, aiChatInfo]);  // メッセージ配列に新しいAIメッセージを追加
-  
+     
+      // ローディング状態を無効にする
+      setIsLoading(false);
      
     } catch (e) {
       console.error(e);
+      setIsLoading(false);
     }
   };
 
@@ -109,6 +128,20 @@ const Index = () => {
           const isUserMessage = message.senderId !== userInfo.id;  // Check if the message is sent by the user
           return <Message key={message.chatId} chat={message} isSender={isUserMessage} />;
         })}
+        {isLoading ? (
+          <Flex gap={5} mx={"1rem"} direction={"row"} alignItems="center">
+            <Avatar src={'/' + aiInfo.pfp} size={"sm"} />
+            <Box 
+              p={2}
+              bgColor={"white"} 
+              color={"black"} 
+              borderRadius={"10px"}
+              maxWidth={"75%"}
+            >
+                <Text p={1} pl={1} wordBreak={"break-word"} overflowWrap={"break-word"}>入力中{Array(dotsCount + 1).join(".")} {/* カウンター変数の値に基づいてドットを表示 */}</Text>
+            </Box>
+          </Flex>):(<></>)
+        }
       </Flex>
 
       {/* <Spacer /> */}

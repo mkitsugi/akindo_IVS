@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Flex, Text, Input, Button, HStack, VStack } from "@chakra-ui/react";
-import Link from "next/link";
 
 type SurveyData = {
   gender?: string;
