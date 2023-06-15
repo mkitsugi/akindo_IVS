@@ -1,23 +1,55 @@
-import { useState } from "react";
-import { Box } from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { Box, Spinner } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import axios from 'axios';
 
 import Step1 from "@/components/form/form_gender";
 import Step2 from "@/components/form/form_name";
 import Step3 from "@/components/form/form_age";
 import Step4 from "@/components/form/form_job";
 
-// import { CSSTransition, TransitionGroup } from "react-transition-group";
-import { AnimatePresence, motion } from "framer-motion";
-import styled from "@emotion/styled";
+import { motion } from "framer-motion";
 
 const MotionBox = motion(Box);
 
 function Survey() {
+
+  // ルーターフックをコンポーネント内で使う
+  const router = useRouter();
+
   const [step, setStep] = useState(1);
 
-  const handleNext = () => {
+  const [surveyData, setSurveyData] = useState({
+    gender: "",
+    name: "",
+    age: 0,
+    job: "",
+  });
+
+  const handleNext = (data: any) => {
+    // Save the data from the current step
+    setSurveyData((prevData) => ({ ...prevData, ...data }));
+    // Go to the next step
     setStep((prevStep) => prevStep + 1);
   };
+
+    // When all steps are completed
+    useEffect(() => {
+      if (step > 4) {
+        console.log("Hello World!", surveyData);
+
+        // Post data to your API route
+        axios.post("/api/user_create", surveyData)
+        .then((response) => {
+          console.log(response.data)
+          localStorage.setItem("user", JSON.stringify(response.data))
+          router.push("/list")
+        })
+        .catch((error) => {
+          console.error("Something went wrong", error);
+        });
+      }
+    }, [step, surveyData]);
 
   const getCurrentStep = (step: number) => {
     switch (step) {
@@ -69,8 +101,8 @@ function Survey() {
       default:
         return {
           component: (
-            <Box h="860px">
-              <div>すべてのステップが完了しました。</div>
+            <Box height="860px" display="flex" justifyContent="center" alignItems="center">
+              <Spinner size="xl" color="blue.500" />
             </Box>
           ),
           key: "completed",

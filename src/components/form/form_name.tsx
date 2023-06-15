@@ -2,8 +2,15 @@ import { useState } from "react";
 import { Flex, Text, Input, Button, HStack, VStack } from "@chakra-ui/react";
 import { ArrowUpIcon } from "@chakra-ui/icons";
 
+type SurveyData = {
+  gender?: string;
+  name?: string;
+  age?: number;
+  job?: string;
+};
+
 interface Step2Props {
-  onNext: (nickname: string) => void;
+  onNext: (data: SurveyData) => void;
   onBack: () => void;
 }
 
@@ -11,7 +18,7 @@ function Step2({ onNext, onBack }: Step2Props) {
   const [nickname, setNickname] = useState("");
 
   const handleButtonClick = () => {
-    onNext(nickname);
+    onNext({name : nickname});
   };
 
   return (

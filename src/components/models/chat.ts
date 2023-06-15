@@ -16,7 +16,7 @@ export function getChat(id: string): ChatType {
     senderId: "550e8400-e29b-41d4-a716-446655440000",
     receiverId: "550e8400-e29b-41d4-a716-446655440001",
     chatRoomId: "570e8400-e39b-86d4-a246-446656428202",
-    message: "こんにちは",
+    message: "やっほー",
     createdAt: 1686582000000,
   };
 }
