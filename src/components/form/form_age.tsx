@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   Flex,
   Text,
-  Input,
   Button,
   HStack,
   NumberInput,
