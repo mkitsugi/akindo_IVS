@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Box, Container, Heading, Text, Button, VStack } from "@chakra-ui/react";
+import { Box, Container, Heading, Text, Button, VStack, Spacer } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import axios from "axios";
 
@@ -65,7 +65,6 @@ export default function Home() {
       exit="exit"
       variants={variants}
       transition={transition}
-      minHeight="100vh"
       display="flex"
       flexDirection="column"
       alignItems="center"
@@ -75,34 +74,29 @@ export default function Home() {
         maxW="container.xl"
         display="flex"
         flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        height="100vh"
+        // alignItems="center"
+        // justifyContent="center"
+        height="100%"
       >
-        <Heading as="h1" size="3xl" color="black">
-          Welcome to Osekk.ai!
-        </Heading>
-
-        <Text mt={4} fontSize="xl" color="black">
-          We&apos;re glad to have you here. Let&apos;s get started!
-        </Text>
-
-        {response && (
-          <Box mt={8} p={4} borderRadius="md">
-            <Text fontWeight="bold" fontSize="lg">
-              AI Response:
-            </Text>
-            <Text mt={2}>{response}</Text>
-          </Box>
-        )}
 
         <VStack
           direction="row"
           spacing={4}
-          align="center"
-          justify="center"
+          // alignContent="center"
+          // justifyContent="center"
           mt={10}
+          height="100%"
         >
+
+          <Heading as="h1" size="3xl" color="black" mt="30%">
+              Welcome to Osekk.ai!
+          </Heading>
+
+         <Text mt={4} fontSize="xl" color="black">
+           We&apos;re glad to have you here. Let&apos;s get started!
+          </Text>
+
+
           <Link href="/form" passHref>
             <Button color="white" bg="black" size="lg">
               登録に進む
@@ -114,6 +108,8 @@ export default function Home() {
               Dev用の遷移(フォーム入力不要)
             </Text>
           </Link>
+
+          <Spacer />
         </VStack>
       </Container>
     </MotionBox>

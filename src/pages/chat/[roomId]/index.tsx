@@ -88,8 +88,8 @@ const Index = () => {
   };
 
   return (
-    <Flex direction={"column"} py="1rem" h={`${windowHeight}px`} overflow={"hidden"}>
-      <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem" overflow={isInputFocused ? 'hidden' : 'auto'}>
+    <Flex direction={"column"} py="1rem" h={isInputFocused ?  `${windowHeight}px` : `${windowHeight}px`} overflow={"hidden"}>
+      <Flex alignItems={"center"} justifyContent={"space-between"} px="1rem" mb="1rem">
         <Box onClick={() => { router.back(); }}>
           <ChevronLeftIcon fontSize={"40px"} />
         </Box>
@@ -103,7 +103,7 @@ const Index = () => {
         </Box>
       </Flex>
 
-      <Flex direction={"column"} gap={5} mt={"0rem"} mb={"1rem"} overflowY="scroll" flexGrow={1} overflow={isInputFocused ? 'hidden' : 'auto'}>
+      <Flex direction={"column"} gap={5} mt={"0rem"} mb={"1rem"} overflowY="scroll" flexGrow={1} >
         {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
         {messages.map((message) => {
           const isUserMessage = message.senderId !== userInfo.id;  // Check if the message is sent by the user
