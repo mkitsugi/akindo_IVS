@@ -32,7 +32,7 @@ const ChatPage: NextPage = () => {
   const aiInfo = getAI("1");
   const userInfo = getUser("1");
   const allMessages = [getChat("1")];
-  const unreadMessages = 2;
+  const unreadMessages = 2; //unreadMessagesは最悪DBとは連携させない
 
   //ハンバーガーアイコンの挙動
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -40,7 +40,6 @@ const ChatPage: NextPage = () => {
   // トグル状態の管理
   const [showAdvanced, setShowAdvanced] = useState(false);
   const handleToggle = () => setShowAdvanced(!showAdvanced);
-
 
   return (
     <Box p={4} pt={10}>
@@ -69,14 +68,14 @@ const ChatPage: NextPage = () => {
 
       <VStack spacing={4} divider={<Box h="2px" bg="gray.200" />}>
         {/* AI用のチャット */}
-      {allMessages.map((chat) => (
-          <ChatCard
-            key={chat.chatId}
-            userInfo={aiInfo}
-            lastChat={chat}
-            unreadMessages={unreadMessages}
-          />
-        ))}
+        {allMessages.map((chat) => (
+            <ChatCard
+              key={chat.chatId}
+              userInfo={aiInfo}
+              lastChat={chat}
+              unreadMessages={unreadMessages}
+            />
+          ))}
 
         {/* ユーザー用のチャット */}
         {allMessages.map((chat, i) => (
