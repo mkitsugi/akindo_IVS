@@ -1,6 +1,6 @@
 import { UserType } from "@/types/user/userType";
 import { AIType } from "@/types/AI/aiType";
-import { Avatar, Flex, Spacer, Text, Badge, Link } from "@chakra-ui/react";
+import { Avatar, Flex, Spacer, Text, Badge, Link, Box } from "@chakra-ui/react";
 import { SearchIcon, CheckCircleIcon } from "@chakra-ui/icons";
 import { ChatType } from "@/types/chat/chatType";
 import NextLink from "next/link";
@@ -55,10 +55,12 @@ export function ChatCard(props: PropsType): JSX.Element {
             <Text color="gray.500">19:35</Text>
           </Flex>
 
-          <Flex>
-              <Text isTruncated whiteSpace="nowrap" overflow="hidden">
+          <Flex >
+            <Box maxWidth="230px">
+              <Text isTruncated whiteSpace="nowrap" > 
                  {ChatInfo && ChatInfo.message}
               </Text>
+            </Box>
             <Spacer />
             {props.unreadMessages > 0 && (
               <Badge

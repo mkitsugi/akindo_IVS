@@ -38,12 +38,17 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       createdAt : Date.now()
     });
 
+    // 名前に対する敬称を設定
+    const honorific = gender === "男性" ? "くん" : "ちゃん";
+    const customizedMessage = `${name}${honorific}、お疲れー！\nこないだはジュース奢ってくれてありがとうね☺️\n最近、会ってないけど元気してる？${name}${honorific}って今はフリーだよね？\n余計なお世話かもしれないけど...何か協力できるかもしれないから連絡してみようかなって！\n私にできることがあったらなんでも相談して欲しいな🥺`;
+    
+
     // 生成したChatroomに最初のチャットを投稿
     await cosmosClient.database.container("Chats").items.create({
       chat_room_id : createdChatRoom?.id,
       createdAt : Date.now(),
       user_id : "AI",
-      message : "やっほー"
+      message : customizedMessage
     })
 
     res.status(201).json(createdItem);

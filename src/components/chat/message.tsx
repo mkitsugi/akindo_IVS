@@ -1,3 +1,4 @@
+import React from "react";
 import { ChatType } from "@/types/chat/chatType";
 import { Avatar, Flex, Text, Box } from "@chakra-ui/react";
 import { getUser } from "../models/user";
@@ -41,7 +42,9 @@ export function Message(props: PropsType): JSX.Element {
         maxWidth={"75%"}
       >
         <Text p={1} pl={1} wordBreak={"break-word"} overflowWrap={"break-word"}>
-          {props.chat.message}
+        {props.chat.message.split('\n').map((str, index) => 
+            <React.Fragment key={index}>{str}<br /></React.Fragment>
+          )}
         </Text>
       </Box>
     </Flex>
