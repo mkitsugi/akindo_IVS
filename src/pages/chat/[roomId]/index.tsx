@@ -50,16 +50,22 @@ const Index = () => {
 
   // Todo 無限ローディングのため一旦コメントアウト
   //カウンター
-  // const [dotsCount, setDotsCount] = useState(0);
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     setDotsCount((prevCount) => (prevCount + 1) % 4); // ドットの数を4で割った余りを更新
-  //   }, 450); // 400ミリ秒ごとに更新
+  const [dotsCount, setDotsCount] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDotsCount((prevCount) => (prevCount + 1) % 4); // ドットの数を4で割った余りを更新
+    }, 450); // 450ミリ秒ごとに更新
 
-  //   return () => {
-  //     clearInterval(interval); // コンポーネントがアンマウントされた時にインターバルをクリアする
-  //   };
-  // }, []);
+    const timeout = setTimeout(() => {
+      clearInterval(interval); // 1分後にインターバルをクリアする
+    }, 60000); // 1分(60秒)
+
+    return () => {
+      clearInterval(interval); // コンポーネントがアンマウントされた時にインターバルをクリアする
+      clearTimeout(timeout); // コンポーネントがアンマウントされた時にタイムアウトもクリアする
+    };
+  }, []);
+
 
   //スクロール部分表示操作
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -85,8 +91,8 @@ const Index = () => {
         (acc, chats) => [...acc, ...chats],
         []
       );
-      // Sort the chats by createdAt timestamp in descending order
-      allChats.sort((a, b) => b.createdAt - a.createdAt);
+      // Sort the chats by createdAt timestamp in ascending order
+      allChats.sort((a, b) => a.createdAt - b.createdAt);
       setMessages(allChats);
     });
   }, [userInfo, chatrooms]);
@@ -125,22 +131,23 @@ const Index = () => {
 
       console.log("chatInfo", chatInfo);
 
-      createChat(chatInfo);
-      const _messages = messages ? [...messages, chatInfo] : [chatInfo];
-      setMessages(_messages); // メッセージ配列に新しいユーザーメッセージを追加
+      // Send chat info to the API to create a chat
+      await createChat(chatInfo);
+      setMessages(prevMessages => prevMessages ? [...prevMessages, chatInfo] : [chatInfo]);
 
       // AI response
       const aiMessage = await sendToAI(text);
       const aiChatInfo: ChatType = {
         chatId: uuid(),
         chatRoomId: roomId,
-        user_id: "ai",
+        user_id: "AI",
         message: aiMessage,
         createdAt: new Date().getTime(),
       };
-      createChat(aiChatInfo);
-      const _messages2 = messages ? [...messages, aiChatInfo] : [aiChatInfo];
-      setMessages(_messages2); // メッセージ配列に新しいAIメッセージを追加
+
+      // Send AI chat info to the API to create a chat
+      await createChat(aiChatInfo);
+      setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
 
       // ローディング状態を無効にする
       setIsLoading(false);
@@ -228,8 +235,8 @@ const Index = () => {
                 wordBreak={"break-word"}
                 overflowWrap={"break-word"}
               >
-                入力中
-                {/* 入力中{Array(dotsCount + 1).join(".")} */}
+                {/* 入力中 */}
+                入力中{Array(dotsCount + 1).join(".")}
                 {/* カウンター変数の値に基づいてドットを表示 */}
               </Text>
             </Box>

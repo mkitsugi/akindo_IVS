@@ -5,21 +5,22 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log("req.body", req.body);
 
   if (req.method === "POST") {
-    const { chat } = req.body;
+    const { chatRoomId, user_id, message } = req.body;
 
-    // Validate the incoming data
-    if (!chat) {
-      return res.status(400).json({ error: "Invalid input data" });
+    try {
+      await cosmosClient.database
+        .container("Chats")
+        .items.create({
+          chat_room_id : chatRoomId,
+          user_id : user_id,
+          message : message,
+          createdAt : Date.now(),
+        });
+
+      res.status(201).json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: error });
     }
-
-    // cosmosDBにChatを追加
-    const { resource: createdItem } = await cosmosClient.database
-      .container("Chats")
-      .items.create({
-        chat,
-      });
-
-    res.status(201).json(createdItem);
   } else {
     res.setHeader("Allow", ["POST"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
