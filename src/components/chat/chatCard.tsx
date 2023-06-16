@@ -10,7 +10,7 @@ import { ChatRoomType } from "@/types/chat/chatRoomType";
 type PropsType = {
   userInfo?: UserType,
   ChatRoomInfo: ChatRoomType;
-  lastMessage? : string,
+  ChatInfo : ChatType,
   unreadMessages: number;
 };
 
@@ -19,11 +19,9 @@ export function ChatCard(props: PropsType): JSX.Element {
   const userInfo = props.userInfo;
   const chatRoomInfo = props.ChatRoomInfo;
 
-  const lastMessage = props.lastMessage;
+  const ChatInfo = props.ChatInfo;
 
-  const query = {
-
-  }
+  console.log("CAHT",ChatInfo);
 
   return (
     <Link
@@ -40,7 +38,7 @@ export function ChatCard(props: PropsType): JSX.Element {
           router.push(
             {
               pathname: `/chat/${chatRoomInfo.chatroomId}`,
-              // query: ChatInfo,
+              query: chatRoomInfo,
             },
             `/chat/${chatRoomInfo.chatroomId}`
           );
@@ -58,9 +56,9 @@ export function ChatCard(props: PropsType): JSX.Element {
           </Flex>
 
           <Flex>
-            <Text isTruncated whiteSpace="nowrap" overflow="hidden">
-              {lastMessage}
-            </Text>
+              <Text isTruncated whiteSpace="nowrap" overflow="hidden">
+                 {ChatInfo && ChatInfo.message}
+              </Text>
             <Spacer />
             {props.unreadMessages > 0 && (
               <Badge

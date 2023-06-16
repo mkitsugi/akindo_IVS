@@ -137,7 +137,7 @@ const ChatPage: NextPage = () => {
             key={chatroom.chatroomId}
             userInfo={correspondingUser}
             ChatRoomInfo={chatroom}
-            lastMessage={chat.message}
+            ChatInfo={chat}
             unreadMessages={unreadMessages}
           />
           );
