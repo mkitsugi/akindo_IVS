@@ -1,31 +1,32 @@
 import { UserType } from "@/types/user/userType";
 import { AIType } from "@/types/AI/aiType";
-import { Avatar, Flex, Spacer, Text, Badge, Link } from "@chakra-ui/react";
+import { Avatar, Flex, Spacer, Text, Badge, Link, Box } from "@chakra-ui/react";
 import { SearchIcon, CheckCircleIcon } from "@chakra-ui/icons";
 import { ChatType } from "@/types/chat/chatType";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
+import { ChatRoomType } from "@/types/chat/chatRoomType";
 
 type PropsType = {
-  userInfo: UserType | AIType;
-  lastChat: ChatType;
+  userInfo?: UserType,
+  ChatRoomInfo: ChatRoomType;
+  ChatInfo : ChatType,
   unreadMessages: number;
 };
 
 export function ChatCard(props: PropsType): JSX.Element {
   const router = useRouter();
   const userInfo = props.userInfo;
-  const lastChat = props.lastChat;
+  const chatRoomInfo = props.ChatRoomInfo;
 
-  const query = {
-    roomId: lastChat.chatRoomId,
-    receiverId: lastChat.receiverId,
-  };
+  const ChatInfo = props.ChatInfo;
+
+  console.log("CAHT",ChatInfo);
 
   return (
     <Link
       as={NextLink}
-      href={`/chat/${lastChat.chatRoomId}`}
+      href={`/chat/${chatRoomInfo.chatroomId}`}
       textDecoration={"none"}
       _hover={{ textDecoration: "none" }}
     >
@@ -36,26 +37,30 @@ export function ChatCard(props: PropsType): JSX.Element {
         onClick={() => {
           router.push(
             {
-              pathname: `/chat/${lastChat.chatRoomId}`,
-              query: query,
+              pathname: `/chat/${chatRoomInfo.chatroomId}`,
+              query: chatRoomInfo,
             },
-            `/chat/${lastChat.chatRoomId}`
+            `/chat/${chatRoomInfo.chatroomId}`
           );
         }}
       >
-        <Avatar src={userInfo.pfp} />
+        <Avatar src={userInfo?.pfp} />
         <Flex direction={"column"} gap={1}>
           <Flex alignItems={"center"} minW={"270px"}>
-            <Text fontWeight={"bold"}>{userInfo.userName}</Text>
-            {(userInfo as AIType).isAI && <CheckCircleIcon color="blue.400" ml={2} />}
+            <Text fontWeight={"bold"}>{userInfo?.userName}</Text>
+            {(userInfo?.id === "AI") && (
+              <CheckCircleIcon color="blue.400" ml={2} />
+            )}
             <Spacer />
             <Text color="gray.500">19:35</Text>
           </Flex>
 
-          <Flex>
-            <Text isTruncated whiteSpace="nowrap" overflow="hidden">
-              {lastChat.message}
-            </Text>
+          <Flex >
+            <Box maxWidth="230px">
+              <Text isTruncated whiteSpace="nowrap" > 
+                 {ChatInfo && ChatInfo.message}
+              </Text>
+            </Box>
             <Spacer />
             {props.unreadMessages > 0 && (
               <Badge
@@ -67,9 +72,9 @@ export function ChatCard(props: PropsType): JSX.Element {
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-            >
-              {props.unreadMessages}
-            </Badge>
+              >
+                {props.unreadMessages}
+              </Badge>
             )}
           </Flex>
         </Flex>

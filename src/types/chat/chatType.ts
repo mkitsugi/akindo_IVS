@@ -1,8 +1,7 @@
 export type ChatType = {
-  chatId: string;
-  senderId: string;
-  receiverId: string;
-  message: string;
   chatRoomId: string;
-  createdAt: number;
+  chatId: string;
+  createdAt : number;
+  user_id: string;
+  message: string;
 };

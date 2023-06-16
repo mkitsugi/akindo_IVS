@@ -1,27 +1,68 @@
 import { ChatType } from "@/types/chat/chatType";
 import { demoMessage } from "@/components/mock/demoMessage";
+import { ChatRoomType } from "@/types/chat/chatRoomType";
+import axios from "axios";
+import { useState } from "react";
+import { error } from "console";
 
-export function createChat(chat: Omit<ChatType, "createdAt">): ChatType {
-  // Todo chatを作成する. azureに保存する
+function mapToChatRoomType(chatRoomData: any): ChatRoomType {
   return {
-    ...chat,
-    createdAt: Date.now(),
+    chatroomId: chatRoomData.id,
+    participants_id: chatRoomData.participants_id,
+    createdAt: chatRoomData.createdAt,
   };
 }
 
-export function getChat(id: string): ChatType {
-  // Todo idを元にチャットを取得する
+function mapToChatType(chatData: any): ChatType {
   return {
-    chatId: id,
-    senderId: "550e8400-e29b-41d4-a716-446655440000",
-    receiverId: "550e8400-e29b-41d4-a716-446655440001",
-    chatRoomId: "570e8400-e39b-86d4-a246-446656428202",
-    message: "やっほー",
-    createdAt: 1686582000000,
+    chatRoomId: chatData.chat_room_id,
+    chatId: chatData.id,
+    createdAt: chatData.createdAt,
+    user_id: chatData.user_id,
+    message: chatData.message,
   };
 }
 
-export function getChats(chatRoomId: string): ChatType[] {
-  // Todo chatRoomIdを元にチャットを取得する
-  return [demoMessage];
+export async function createChat(chat: ChatType): Promise<boolean> {
+  try {
+    axios.post("/api/createChat", chat).then((res) => {
+      console.log("createChat", res.data);
+    });
+    return true;
+  } catch (e) {
+    console.error(e);
+    return false;
+  }
+}
+
+export async function getChatRooms(userId: string): Promise<ChatRoomType[]> {
+  // Todo userIdを元にチャットを取得する
+  let data: ChatRoomType[] = [];
+  await axios
+    .get("/api/getAllMyChatRoom", { params: { userId } })
+    .then((res) => {
+      console.log("getChatRooms", res.data);
+      data = res.data.map(mapToChatRoomType);
+    });
+  return data;
+}
+
+export async function getChats(
+  ChatRooms: ChatRoomType[]
+): Promise<ChatType[][]> {
+  let data: ChatType[][] = [];
+  for (let chatRoom of ChatRooms) {
+    if (chatRoom.chatroomId) {
+      await axios
+        .get("/api/getAllMyChat", {
+          params: { chatRoomId: chatRoom.chatroomId },
+        })
+        .then((res) => {
+          console.log("getChats-xxx", res.data);
+          const chatsForRoom: ChatType[] = res.data.map(mapToChatType);
+          data.push(chatsForRoom);
+        });
+    }
+  }
+  return data;
 }
