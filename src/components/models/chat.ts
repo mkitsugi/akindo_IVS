@@ -35,11 +35,23 @@ export async function createChat(chat: ChatType): Promise<boolean> {
   }
 }
 
+export async function getChatRoomsByroomId(chatRoomId: string): Promise<ChatRoomType[]> {
+  // Todo userIdを元にチャットを取得する
+  let data: ChatRoomType[] = [];
+  await axios
+    .get("/api/getAllMyChatRoomByRoomid", { params: { chatRoomId } })
+    .then((res) => {
+      console.log("getChatRoom(Single):", res.data);
+      data = res.data.map(mapToChatRoomType);
+    });
+  return data;
+}
+
 export async function getChatRooms(userId: string): Promise<ChatRoomType[]> {
   // Todo userIdを元にチャットを取得する
   let data: ChatRoomType[] = [];
   await axios
-    .get("/api/getAllMyChatRoom", { params: { userId } })
+    .get("/api/getAllMyChatRoomByUserid", { params: { userId } })
     .then((res) => {
       console.log("getChatRooms", res.data);
       data = res.data.map(mapToChatRoomType);
@@ -47,7 +59,24 @@ export async function getChatRooms(userId: string): Promise<ChatRoomType[]> {
   return data;
 }
 
-export async function getChats(
+export async function getSingleChats(chatroomId: string): Promise<ChatType[]> {
+  let chatsForRoom: ChatType[] = [];
+
+  if (chatroomId) {
+    await axios
+      .get("/api/getAllMyChat", {
+        params: { chatRoomId: chatroomId },
+      })
+      .then((res) => {
+        console.log("getChatsForRoom-single", res.data);
+        chatsForRoom = res.data.map(mapToChatType);
+      });
+  }
+
+  return chatsForRoom;
+}
+
+export async function getMultiChats(
   ChatRooms: ChatRoomType[]
 ): Promise<ChatType[][]> {
   let data: ChatType[][] = [];

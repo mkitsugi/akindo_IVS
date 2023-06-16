@@ -38,7 +38,7 @@ export function ChatCard(props: PropsType): JSX.Element {
           router.push(
             {
               pathname: `/chat/${chatRoomInfo.chatroomId}`,
-              query: chatRoomInfo,
+              query: { chatRoomId: chatRoomInfo.chatroomId },
             },
             `/chat/${chatRoomInfo.chatroomId}`
           );

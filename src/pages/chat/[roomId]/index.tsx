@@ -14,7 +14,7 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
-import { createChat, getChatRooms, getChats } from "@/components/models/chat";
+import { createChat, getChatRoomsByroomId, getSingleChats } from "@/components/models/chat";
 import { Message } from "@/components/chat/message";
 import { ChatType } from "@/types/chat/chatType";
 import { uuid } from "uuidv4";
@@ -28,16 +28,15 @@ const Index = () => {
   const windowHeight = useWindowHeight();
 
   const [isInputFocused, setInputFocus] = useState(false);
+  const [isEnterPressed, setEnterPressed] = useState(false);
 
   const roomId =
-    typeof router.query.roomId === "string" ? router.query.roomId : "";
-
-  // const receiverId =
-  //   typeof router.query.receiverId === "string" ? router.query.receiverId : "";
+  typeof router.query.roomId === "string" ? router.query.roomId : "";
 
   const [text, setText] = useState<string>("");
   const [userInfo, setUserInfo] = useState<UserType | null>(null);
   const [chatrooms, setChatrooms] = useState<ChatRoomType[]>([]);
+  const [otherUsers, setOtherUsers] = useState<UserType[] | undefined>([]);
 
   // メッセージ配列の状態を管理
   const [messages, setMessages] = useState<ChatType[]>();
@@ -70,6 +69,7 @@ const Index = () => {
   //スクロール部分表示操作
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  //Localのユーザーデータの取得
   useEffect(() => {
     const data = localStorage.getItem("user");
     // データがnullではない場合、それをパースします
@@ -78,22 +78,40 @@ const Index = () => {
     }
   }, []);
 
+  //表示画面のchatroom取得
   useEffect(() => {
-    if (!userInfo) return;
-    getChatRooms(userInfo.id).then(setChatrooms);
-  }, [userInfo]);
+    if (router.isReady) {
+      const roomId = router.query.roomId;
+      if (roomId && typeof roomId === 'string') {
+      getChatRoomsByroomId(roomId).then(setChatrooms);
+     console.log("Chatrooms :", chatrooms);
+    }
+  }
+  },[router.isReady, router.query]);
 
+  //
   useEffect(() => {
     if (!userInfo || !chatrooms.length) return;
-    getChats(chatrooms).then((chatArrays) => {
-      // Flatten the array of chat arrays into a single array
-      const allChats = chatArrays.reduce(
-        (acc, chats) => [...acc, ...chats],
-        []
-      );
-      // Sort the chats by createdAt timestamp in ascending order
-      allChats.sort((a, b) => a.createdAt - b.createdAt);
-      setMessages(allChats);
+
+    const otherUserIds = chatrooms.map(room => {
+      if (room && Array.isArray(room.participants_id)) {
+        return room.participants_id.find(id => id !== userInfo.id);
+      }
+      return null;
+    }).filter(Boolean);
+    
+    //関連ユーザー情報の取得
+    Promise.all(otherUserIds.map(id => id && getUser(id)))
+    .then(users => users.filter((user): user is UserType => user !== null && user !== undefined))
+    .then(setOtherUsers);
+  }, [userInfo, chatrooms]);
+
+  //Chatを取得する処理
+  useEffect(() => {
+    if (!userInfo || !chatrooms.length) return;
+    getSingleChats(roomId).then((chats) => {
+      chats.sort((a, b) => a.createdAt - b.createdAt);
+      setMessages(chats);
     });
   }, [userInfo, chatrooms]);
 
@@ -108,6 +126,7 @@ const Index = () => {
     });
   };
 
+  //入力ボタンがクリックされた時の挙動
   const handleSubmit = async () => {
     try {
       // Clear the input field
@@ -157,6 +176,7 @@ const Index = () => {
     }
   };
 
+  //Azure Function Call
   const sendToAI = async (message: string) => {
     try {
       const response = await axios.post("/api/chat_gptResponse", { message });
@@ -191,7 +211,7 @@ const Index = () => {
         </Box>
         <Box>
           <Text fontSize={"20px"} fontWeight={"semibold"}>
-            {userInfo.userName}
+            {otherUsers && otherUsers.length > 0 && otherUsers[0].userName}
           </Text>
         </Box>
         <Box>
@@ -210,11 +230,17 @@ const Index = () => {
       >
         {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
         {messages?.map((message) => {
+
           const isUserMessage = message.user_id !== userInfo.id; // Check if the message is sent by the user
+          const otherUser = otherUsers?.find(user => user.id === message.user_id);
+          const avatarSrc = otherUser ? otherUser.pfp : undefined;
+
+          console.log("Avatar",avatarSrc);
           return (
             <Message
               key={message.chatId}
               chat={message}
+              imgSrc={avatarSrc}
               isSender={isUserMessage}
             />
           );
@@ -261,6 +287,18 @@ const Index = () => {
             onChange={(e) => {
               setText(e.target.value);
             }}
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault(); // formが自動的にリフレッシュされるのを防ぐ
+                setEnterPressed(true);
+                handleSubmit();
+              }
+            }}
+            onKeyUp={(e) => {
+              if (e.key === 'Enter') {
+                setEnterPressed(false);
+              }
+            }}
             placeholder="メッセージを入力してください..."
             border="none"
             onFocus={() => setInputFocus(true)}
@@ -276,7 +314,11 @@ const Index = () => {
             display="flex"
             alignItems="center"
             justifyContent="center"
-            onClick={handleSubmit}
+            onClick={() => {
+              if (!isEnterPressed) {
+                handleSubmit();
+              }
+            }}
             _hover={{ bgColor: "#dd6b63" }}
             _active={{
               transform: "scale(0.95)",
