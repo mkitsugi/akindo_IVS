@@ -17,9 +17,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       return res.status(400).json({ error: "Invalid input data" });
     }
 
-    // カスタム項目の追加
-    const defaultChatId = uuidv4();
-
     //cosmosDBにUserを追加
     const { resource: createdItem } = await cosmosClient.database
       .container("Users")

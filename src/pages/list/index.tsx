@@ -29,7 +29,7 @@ import { NextPage } from "next";
 import { ChatCard } from "@/components/chat/chatCard";
 import { getAI } from "@/components/models/ai";
 import { getUser } from "@/components/models/user";
-import { getChatRooms, getChats } from "@/components/models/chat";
+import { getChatRooms, getMultiChats } from "@/components/models/chat";
 import { UserType } from "@/types/user/userType";
 import { ChatType } from "@/types/chat/chatType";
 import { ChatRoomType } from "@/types/chat/chatRoomType";
@@ -65,7 +65,7 @@ const ChatPage: NextPage = () => {
 
   useEffect(() => {
     if (!userInfo || !chatrooms.length) return;
-    getChats(chatrooms).then((chatArrays) => {
+    getMultiChats(chatrooms).then((chatArrays) => {
       // Flatten the array of chat arrays into a single array
       const allChats = chatArrays.reduce((acc, chats) => [...acc, ...chats], []);
       // Sort the chats by createdAt timestamp in descending order

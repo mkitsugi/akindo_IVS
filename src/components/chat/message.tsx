@@ -7,12 +7,14 @@ import { UserType } from "@/types/user/userType";
 
 type PropsType = {
   chat: ChatType;
+  imgSrc?: string;
   isSender?: boolean;
 };
 
 export function Message(props: PropsType): JSX.Element {
   const [userInfo, setUserInfo] = useState<UserType | null>(null);
 
+  const imgSrc = props.imgSrc;
   const isSender = userInfo?.id === props.chat.user_id;
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export function Message(props: PropsType): JSX.Element {
       direction={isSender ? "row-reverse" : "row"}
       alignItems="center"
     >
-      {props.isSender && <Avatar src={"/" + userInfo?.pfp ?? ""} size={"sm"} />}
+      {props.isSender && <Avatar src={imgSrc ?? ""} size={"sm"} />}
 
       <Box
         p={2}
