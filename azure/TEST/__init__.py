@@ -24,7 +24,7 @@ database = client.get_database_client(DATABASE_NAME)
 container = database.get_container_client(CONTAINER_NAME)
 
 #llmモデルの設定
-llm = ChatOpenAI(temperature=0,model="gpt-3.5-turbo-16k-0613")
+llm = ChatOpenAI(temperature=0.1,model="gpt-3.5-turbo-16k-0613")
 
 #分類処理
 ##プロンプトテンプレート
@@ -86,13 +86,13 @@ base_prompt = """あなたは以下の設定を持ったchatbotです\
                - 「ありがとうね」「わかったー！」「そうなんだけど...」「なんか」「見てみたいなー！」「そうなんだ！」「そうなんだね！」「そうなの！」「そういえば、」「そうなんだっけー？」「とか」「どうかなー？」\
                - チャットでのやり取りなので、可愛らしい絵文字を使ってください。\
                #具体例\
-               - まいちゃん、お疲れー！\
+               - ""名前が入ります"" ちゃん、お疲れー！\
                - こないだはジュース奢ってくれてありがとうね☺️\
                - 最近、会ってないけど元気してる？\
-               - まいちゃんって今はフリーだよね？ \
+               - ""名前が入ります""って今はフリーだよね？ \
                - 余計なお世話かもしれないけど...何か協力できるかもしれないから連絡してみようかなって！私にできることがあったらなんでも相談して欲しいな🥺\
                - え！本当に！嬉しいんだけど😍\
-               - 最近会ってないから久しぶりにまいちゃんの写真見てみたいなー？🥺\
+               - 最近会ってないから久しぶりに""名前が入ります""の写真見てみたいなー？🥺\
                - ありがとう、元気そうで良かったよ☺️\
                - 最近、仕事とか大変だったりするのー？\
                - そうなんだ！夜も働いてて結構忙しくて遊べてないんだね...\
@@ -136,7 +136,7 @@ def main(req: HttpRequest) -> HttpResponse:
 
     initial_message = req.params.get('message')
     # user_id = req.params.get('user_id')  # user_idをクライアント側から取得
-    chatroomid = req.params.get('roomid')  # chatroomidをクライアント側から取得
+    chatroomid = req.params.get('roomId')  # chatroomidをクライアント側から取得
 
     if not initial_message:
         try:
@@ -146,7 +146,7 @@ def main(req: HttpRequest) -> HttpResponse:
         else:
             initial_message = req_body.get('message') #メッセージをクライアント側から取得
             # user_id = req_body.get('user_id')  # user_idをクライアント側から取得
-            chatroomid = req_body.get('roomid')  # chatroomidをクライアント側から取得
+            chatroomid = req_body.get('roomId')  # chatroomidをクライアント側から取得
  
 
     if initial_message:
@@ -158,7 +158,8 @@ def main(req: HttpRequest) -> HttpResponse:
         chatsoutput = get_Chats_from_cosmos(chatroomid=chatroomid)
         output = output_from_memory(Chats=chatsoutput,initial_message=initial_message)
         # response_body = json.dumps({"chats": [chat["message"] for chat in chatsoutput], "summary" : output}, ensure_ascii=False, indent=4)
-
+        # response_body = json.dumps({"chats": chatsoutput, "summary" : output}, ensure_ascii=False, indent=4)
+        # return HttpResponse(response_body)
         return HttpResponse(output)
     else:
         return HttpResponse("Please pass a message on the query string or in the request body", status_code=400)
