@@ -1,0 +1,8 @@
+{
+    "name": "my-azure-cli",
+    "image": "my-azure-cli",
+    "runArgs": ["-u", "root"],
+    "forwardPorts": [7071],
+    "postCreateCommand": "az login",
+    "extensions": ["ms-azuretools.vscode-azurefunctions"]
+}
