@@ -163,11 +163,11 @@ const Index = () => {
         message: aiMessage,
         createdAt: new Date().getTime(),
       };
-
-      // Send AI chat info to the API to create a chat
-      await createChat(aiChatInfo);
-      setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
-
+      if (aiChatInfo.message) {
+        // Send AI chat info to the API to create a chat
+        await createChat(aiChatInfo);
+        setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
+      }
       // ローディング状態を無効にする
       setIsLoading(false);
     } catch (e) {
