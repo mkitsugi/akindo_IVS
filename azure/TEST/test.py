@@ -2,13 +2,17 @@ import json
 import os
 
 import openai
+from dotenv import load_dotenv
 
 # from azure.functions import HttpRequest, HttpResponse
 # from dotenv import load_dotenv
 from langchain import LLMChain, OpenAI, PromptTemplate
 from langchain.chat_models import ChatOpenAI
 
-os.environ["OPENAI_API_KEY"] = "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"
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 AKS_QUESTION_TYPE_TEMPLATE = """
 ###指令###
 あなたはユーザーのチャット相手として、返答します。
@@ -27,6 +31,16 @@ jsonフォーマット:
 (4)雑談: (1)~(3)にあてはまらない表現
 
 質問: {question}
+"""
+
+SAMPLR_RESPONSE_TEMPLATE = """
+ユーザからの応答を以下のように分割してlist形式で返してください
+例:
+user: 私は24歳の男です. 趣味はバスケで好きなものは唐揚げです.
+AI: ["性別","男","年齢","24","趣味","バスケ", "好きなもの","唐揚げ"]
+
+User: {question}
+AI:
 """
 
 base_prompt = """あなたは以下の設定を持ったchatbotです
@@ -60,6 +74,7 @@ base_prompt = """あなたは以下の設定を持ったchatbotです
 llm = ChatOpenAI(temperature=0)
 
 
+# TODO ここもfunctionにする
 def judge_question_type(message: str) -> str:
     prompt = PromptTemplate(
         input_variables=["question"],
@@ -68,6 +83,23 @@ def judge_question_type(message: str) -> str:
     chain = LLMChain(llm=llm, prompt=prompt)
     result = "{" + chain.run(question=message).strip() + "}"
     return result
+
+
+def get_item_name(message: str) -> str:
+    prompt = PromptTemplate(
+        input_variables=["question"],
+        template=SAMPLR_RESPONSE_TEMPLATE,
+    )
+    chain = LLMChain(llm=llm, prompt=prompt)
+    result = chain.run(question=message).strip()
+    return result
+
+
+def change_to_JSON(property: list) -> dict:
+    dicts = [{property[i]: property[i + 1]} for i in range(0, len(property), 2)]
+    # Pythonの辞書リストをJSON形式の文字列に変換
+    json_str = json.dumps(dicts, ensure_ascii=False)
+    return json_str
 
 
 # def chat(message, history):
@@ -96,8 +128,7 @@ def main() -> None:
     messages.append({"role": "user", "content": initial_message})
 
     response = judge_question_type(initial_message)
-    data = json.loads(response)  # 文字列を辞書に変換
-    user_input_type = data["UserInputType"]
+    user_input_type = json.loads(response)["UserInputType"]
     print(response)
     print(user_input_type)
 
@@ -117,6 +148,9 @@ def main() -> None:
     elif user_input_type == "回答":
         pass
 
+    test_message = "私は27歳の女です. 趣味はランニングで好きなものはレモンです."
+    response = get_item_name(test_message)
+    print(response)
     # 依頼 //Todoマッチング依頼にする
     # 依頼用のbase_prompt
 
