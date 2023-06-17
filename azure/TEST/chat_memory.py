@@ -1,5 +1,4 @@
 import os
-
 import openai
 from azure.functions import HttpRequest, HttpResponse
 from dotenv import load_dotenv

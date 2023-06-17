@@ -1,5 +1,4 @@
 import os
-
 import openai
 
 # from azure.functions import HttpRequest, HttpResponse
@@ -53,7 +52,6 @@ base_prompt = "あなたは以下の設定を持ったchatbotです\
                - そうなの！彼氏とかいない期間長くなっちゃったんだね...、恋愛の仕方忘れそうなのも大変だね😇\
                - そういえば、どれくらい彼氏いないんだっけー？"
 
-
 llm = ChatOpenAI(temperature=0)
 
 
@@ -84,16 +82,40 @@ def main() -> None:
     messages = []
     max_messages = 10
 
+    # cosmosDBから下記user_idをキーにuserの↓の4種類の情報を取得する
+    # { 性別 } { 名前 } { 年齢 } { 職業/肩書き }も入れたい
+
     initial_message = "こんにちは。昨日は何してたの？？"
     messages.append({"role": "system", "content": base_prompt})
     messages.append({"role": "user", "content": initial_message})
 
     response = judge_question_type(initial_message)
     print(response)
+
+    # output : userInputType : "質問"
+    # userInputType = response //↑のjsonをdict形式で持っとく? もしくもstring
+    # Validationでstring以外が入ってこないようにする
+    # case文で userInputTypeの"質問"ごとに処理を実行
+
     if "質問" in response:
         response = openai.ChatCompletion.create(model="gpt-3.5-turbo-16k-0613", messages=messages)
         ai_response = response["choices"][0]["message"]["content"]
         print(ai_response)
+
+    # 依頼 //Todoマッチング依頼にする
+        # 依頼用のbase_prompt
+    
+    # 雑談 // 普通にopenaiで返す
+       
+        # 返答にユーザーの属性情報・嗜好性が含まれているかをFunctionで確認する。
+
+        # 確認結果として含まれていたら、DBをアップデートする。
+
+        # 含まれていなかったら、なにもしない
+
+        # 普通の回答
+
+    # elseがきたら = Validationが出た際のエラーハンドリング
 
 
 if __name__ == "__main__":
