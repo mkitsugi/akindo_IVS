@@ -55,8 +55,8 @@ def main(req: HttpRequest) -> HttpResponse:
         response = openai.ChatCompletion.create(model="gpt-3.5-turbo-16k-0613", messages=messages)
         ai_response = response["choices"][0]["message"]["content"]
 
-        response_body = json.dumps({"ai_response": ai_response, "items": items}, ensure_ascii=False, indent=4)
-        return HttpResponse(response_body)
-        # return HttpResponse(ai_response, items)
+        # response_body = json.dumps({"ai_response": ai_response, "items": items}, ensure_ascii=False, indent=4)
+        # return HttpResponse(response_body)
+        return HttpResponse(ai_response)
     else:
         return HttpResponse("Please pass a message on the query string or in the request body", status_code=400)
