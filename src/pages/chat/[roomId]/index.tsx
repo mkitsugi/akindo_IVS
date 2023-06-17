@@ -179,7 +179,7 @@ const Index = () => {
   //Azure Function Call
   const sendToAI = async (message: string) => {
     try {
-      const response = await axios.post("/api/chat_gptResponse", { message });
+      const response = await axios.post("/api/chat_gptResponse", { message, roomId });
       console.log("API Response:", response); // APIのレスポンスを確認
       return response.data;
     } catch (e) {
