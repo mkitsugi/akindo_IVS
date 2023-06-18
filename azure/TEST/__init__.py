@@ -24,7 +24,7 @@ database = client.get_database_client(DATABASE_NAME)
 container = database.get_container_client(CONTAINER_NAME)
 
 #llmモデルの設定
-llm = ChatOpenAI(temperature=0.1,model="gpt-3.5-turbo-16k-0613")
+llm = ChatOpenAI(temperature=0.3,model="gpt-3.5-turbo-16k-0613")
 
 #分類処理
 ##プロンプトテンプレート
@@ -157,8 +157,8 @@ def main(req: HttpRequest) -> HttpResponse:
         chatsoutput = get_Chats_from_cosmos(chatroomid=chatroomid)
         output = output_from_memory(Chats=chatsoutput,initial_message=initial_message)
         # response_body = json.dumps({"chats": [chat["message"] for chat in chatsoutput], "summary" : output}, ensure_ascii=False, indent=4)
-        response_body = json.dumps({"chats": chatsoutput, "summary" : output}, ensure_ascii=False, indent=4)
-        return HttpResponse(response_body)
-        # return HttpResponse(output)
+        # response_body = json.dumps({"chats": chatsoutput, "summary" : output}, ensure_ascii=False, indent=4)
+        # return HttpResponse(response_body)
+        return HttpResponse(output)
     else:
         return HttpResponse("Please pass a message on the query string or in the request body", status_code=400)

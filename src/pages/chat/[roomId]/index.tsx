@@ -16,7 +16,7 @@ import { BiPaperPlane, BiPaperclip } from "react-icons/bi";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { getAI } from "@/components/models/ai";
-import { getUser } from "@/components/models/user";
+import { getUser, mapToUserType } from "@/components/models/user";
 import { createChat, getChatRoomsByroomId, getSingleChats } from "@/components/models/chat";
 import { Message } from "@/components/chat/message";
 import { ChatType } from "@/types/chat/chatType";
@@ -36,9 +36,11 @@ const Index = () => {
   ];
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
+  const [groupchat, setgroupchat] = useState<string | null>(null);
+
+
   const handleImageClick = async (src: string) => {
     setSelectedImage(src);
-
 
     const aiChatInfo: ChatType = {
       chatId: uuid(),
@@ -56,9 +58,21 @@ const Index = () => {
         setIsLoading(true);
       }, 1500);
 
+      try {
+        const response = await axios.post('/api/chat_createchatgroup',{
+          userId: userInfo?.id,
+          name : userInfo?.userName,
+          gender : userInfo?.gender,
+        });
+        console.log("userInfo",userInfo);
+        console.log("chat_createchatgroup:",response.data);
+        setgroupchat(response.data)
+      } catch(error){
+          console.log("Error creating chatroom", error);
+      };
+
       // Wait for 3 seconds
       await new Promise(resolve => setTimeout(resolve, 3000));
-
       // Send AI chat info to the API to create a chat
       await createChat(aiChatInfo);
       setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
@@ -68,7 +82,15 @@ const Index = () => {
     // 画像がクリックされた際に実行するアクションをここに書く
     console.log("画像がクリックされました:", src);
   };
-
+  const handleGroupChat = () => {
+    router.push(
+      {
+        pathname: `/chat/${groupchat}`,
+        query: { chatRoomId: groupchat },
+      },
+      `/chat/${groupchat}`
+    );
+  }
 
   const router = useRouter();
 
@@ -250,7 +272,7 @@ const Index = () => {
     const data = localStorage.getItem("user");
     // データがnullではない場合、それをパースします
     if (data !== null) {
-      setUserInfo(JSON.parse(data));
+      setUserInfo(mapToUserType(JSON.parse(data)));
     }
   }, []);
 
@@ -271,13 +293,14 @@ const Index = () => {
 
     const otherUserIds = chatrooms.map(room => {
       if (room && Array.isArray(room.participants_id)) {
-        return room.participants_id.find(id => id !== userInfo.id);
+        const otherIds =room.participants_id.filter(id => id !== userInfo.id);
+        return otherIds;
       }
-      return null;
+      return [];
     }).filter(Boolean);
     
     //関連ユーザー情報の取得
-    Promise.all(otherUserIds.map(id => id && getUser(id)))
+    Promise.all(otherUserIds.flat().map(id => id && getUser(id)))
     .then(users => users.filter((user): user is UserType => user !== null && user !== undefined))
     .then(setOtherUsers);
   }, [userInfo, chatrooms]);
@@ -413,7 +436,7 @@ const Index = () => {
         </Box>
         <Box>
           <Text fontSize={"20px"} fontWeight={"semibold"}>
-            {otherUsers && otherUsers.length > 0 && otherUsers[0].userName}
+            {otherUsers && otherUsers.length > 1 ? `${otherUsers[0].userName.substring(0, 3)}, ${otherUsers[1].userName.substring(0, 3)} (3)` : otherUsers && otherUsers.length > 0 && otherUsers[0].userName}
           </Text>
         </Box>
         <Box>
@@ -432,9 +455,11 @@ const Index = () => {
       >
         {messages?.map((message) => {
           const isUserMessage = message.user_id !== userInfo.id; // Check if the message is sent by the user
+          console.log("XXX", otherUsers);
           const otherUser = otherUsers?.find(user => user.id === message.user_id);
           const avatarSrc = otherUser ? otherUser.pfp : undefined;
 
+          console.log("userInfo", userInfo);
           return (
             <React.Fragment key={message.chatId}>
               <Message
@@ -444,15 +469,7 @@ const Index = () => {
                 isSender={isUserMessage}
               />
 
-              {message.message === "この人がいいんだね！じゃあ一旦グルチャ作るね！下から入って欲しいな☺️" && message.user_id === "AI"/*特定のメッセージID*/ && (
-                <>
-                {selectedImage ? (
-                <Box bg="#319795" color="white" rounded="md" mx={5} py={2} textAlign="center" >
-                 <Text fontSize="sm" fontWeight="bold">グループチャットに参加する</Text>
-                </Box>
-              ): <></>}
-                </>
-              )}
+
               {message.message === "りょーかい！ちょっと探してみるね！👍" && message.user_id === "AI"/*特定のメッセージID*/ && (
                 <>
                 <Box bg="#319795" color="white" p={1} py={2} textAlign="center">
@@ -470,9 +487,16 @@ const Index = () => {
                   marginX="auto" // 水平方向に中央揃え
                 >
                   {images.map((src, index) => (
-                    <Image key={index} src={src} rounded="md"  objectFit="cover" onClick={() => handleImageClick(src)} _hover={{ cursor: "pointer"}}/>
+                    <Image key={index} src={src} rounded="md"  objectFit="cover" onClick={() => handleImageClick(src)} _hover={{ cursor: "pointer", transform: "translateY(4px)"}}/>
                   ))}
                 </Grid>
+                </>
+              )}
+              {message.message === "この人がいいんだね！じゃあ一旦グルチャ作るね！下から入って欲しいな☺️" && message.user_id === "AI"/*特定のメッセージID*/ && (
+                <>
+                <Box bg="#319795" color="white" rounded="md" mx={5} py={2} textAlign="center" onClick={()=>handleGroupChat()} _hover={{ cursor: "pointer", transform: "translateY(2px)"}} >
+                 <Text fontSize="sm" fontWeight="bold">グループチャットに参加する</Text>
+                </Box>
                 </>
               )}
             </React.Fragment>

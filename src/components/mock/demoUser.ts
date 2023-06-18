@@ -5,6 +5,7 @@ export const demoUser: UserType = {
   userName: "西野カナ",
   age: 20,
   pfp: "images/1.png",
+  gender: "男性",
   job: "学生",
   createdAt: "1686582000000",
 };

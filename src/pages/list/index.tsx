@@ -33,6 +33,7 @@ import { getChatRooms, getMultiChats } from "@/components/models/chat";
 import { UserType } from "@/types/user/userType";
 import { ChatType } from "@/types/chat/chatType";
 import { ChatRoomType } from "@/types/chat/chatRoomType";
+import { User } from "@azure/cosmos";
 
 const ChatPage: NextPage = () => {
   const [userInfo, setUserInfo] = useState<UserType | null>(null);
@@ -74,19 +75,34 @@ const ChatPage: NextPage = () => {
     });
   }, [userInfo, chatrooms]);
 
-  useEffect(() => {
+  // useStateを使って各チャットルームのユーザー情報を保持するステートを作成
+const [chatroomUsers, setChatroomUsers] = useState<Map<string, UserType[]>>(new Map());
+
+useEffect(() => {
     if (!userInfo || !chatrooms.length) return;
 
     const otherUserIds = chatrooms.map(room => {
       if (room && Array.isArray(room.participants_id)) {
-        return room.participants_id.find(id => id !== userInfo.id);
+        const otherIds = room.participants_id.filter(id => id !== userInfo.id);
+        return { chatroomId: room.chatroomId, otherIds };
       }
       return null;
-    }).filter(Boolean);
+    }).filter(item => item !== null);
 
-    Promise.all(otherUserIds.map(id => id && getUser(id)))
-    .then(users => users.filter((user): user is UserType => user !== null && user !== undefined))
-    .then(setOtherUsers);
+    Promise.all(
+      otherUserIds.filter((item): item is { chatroomId: string; otherIds: string[]; } => item !== null).map(({ chatroomId, otherIds }) =>
+    Promise.all(otherIds.map((id: string) => getUser(id) as Promise<UserType>)).then(users => ({
+      chatroomId,
+      users: users.filter((user): user is UserType => user !== null && user !== undefined),
+    }))
+  )
+    ).then(chatroomAndUsers => {
+      const newChatroomUsers = new Map();
+      for (const { chatroomId, users } of chatroomAndUsers) {
+        newChatroomUsers.set(chatroomId, users);
+      }
+      setChatroomUsers(newChatroomUsers);
+    });
   }, [userInfo, chatrooms]);
 
   if (!userInfo) return <></>;
@@ -120,27 +136,26 @@ const ChatPage: NextPage = () => {
 
         {/* ユーザー用のチャット */}
         {chatrooms.map((chatroom, i) => {
-          
+          const participantCount = chatroom.participants_id.length;
 
-          console.log("111:",otherUsers);
-
-
-          const correspondingUser = otherUsers?.find(user => chatroom.participants_id.includes(user.id));
+          const correspondingUser = otherUsers?.flat().find(user => chatroom.participants_id.includes(user.id));
+          const usersInChatroom = chatroomUsers.get(chatroom.chatroomId);
+          console.log("User:",i, usersInChatroom);
           const chat = chats.find(chat => chat.chatRoomId === chatroom.chatroomId);
 
-          console.log("???:",correspondingUser);
           // If no corresponding user or chat is found, don't render the ChatCard
-          if (!correspondingUser || !chat) return null;
+          if (!chat) return null;
 
-          return(
-          <ChatCard
-            key={chatroom.chatroomId}
-            userInfo={correspondingUser}
-            ChatRoomInfo={chatroom}
-            ChatInfo={chat}
-            unreadMessages={unreadMessages}
-          />
-          );
+          // if (participantCount === 2) {
+            return(
+            <ChatCard
+              key={chatroom.chatroomId}
+              userInfo={usersInChatroom}
+              ChatRoomInfo={chatroom}
+              ChatInfo={chat}
+              unreadMessages={unreadMessages}
+            />
+            );
         })}
       </VStack>
 
