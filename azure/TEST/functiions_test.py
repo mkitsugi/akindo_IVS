@@ -132,7 +132,7 @@ def main() -> None:
     # Validationでstring以外が入ってこないようにする
     # case文で userInputTypeの"質問"ごとに処理を実行
 
-    test_message = "私は27歳の女です. 趣味はランニングで好きなものはレモンです."
+    test_message = "私は27歳の女です. 趣味はランニングで好きなものはレモンです.嫌いなものはバナナです"
     # test_message = "横浜市、町田市、相模原市、大磯町、これらの共通点は？"
     response = get_item_name(test_message)
     if "情報量あり" in response:
@@ -196,11 +196,7 @@ def main() -> None:
     # 依頼 //Todoマッチング依頼にする
     # 依頼用のBASE_PROMPT
 
-    # 雑談 // 普通にopenaiで返す
-
-    # 返答にユーザーの属性情報・嗜好性が含まれているかをFunctionで確認する。
-
-    # 確認結果として含まれていたら、DBをアップデートする。
+    # [接続方法の確認]確認結果として含まれていたら、DBをアップデートする。
 
     # 含まれていなかったら、なにもしない
 
