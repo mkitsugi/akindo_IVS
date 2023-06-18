@@ -7,7 +7,8 @@ import {
   Container,
   Avatar,
   Image,
-  Grid
+  Grid,
+  Divider
 } from "@chakra-ui/react";
 import { useSpring, animated } from "react-spring";
 import { ChevronLeftIcon, HamburgerIcon, ChevronRightIcon, ChevronDownIcon } from "@chakra-ui/icons";
@@ -34,6 +35,28 @@ const Index = () => {
     "/images/sample_3.jpeg",
     "/images/sample_4.jpeg",
   ];
+  const images_rest = [
+    {
+      url: "/images/rest_1.jpeg",
+      priceRange: "¥5,000 〜 ¥10,000",
+      area: "渋谷駅徒歩5分",
+      storeName: "ル・パティシエ",
+    },
+    {
+      url: "/images/rest_2.jpeg",
+      priceRange: "¥3,000 〜 ¥6,000",
+      area: "新宿駅徒歩3分",
+      storeName: "ル・ジャルダン・ブランシュ",
+    },
+    {
+      url: "/images/rest_3.jpeg",
+      priceRange: "¥8,000 〜 ¥10,000",
+      area: "渋谷区徒歩2分",
+      storeName: "ラ・ヴィータ・ベッラ",
+    },
+  ];
+  
+
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const [groupchat, setgroupchat] = useState<string | null>(null);
@@ -314,17 +337,23 @@ const Index = () => {
     });
   }, [userInfo, chatrooms]);
 
+  
 
   //入力ボタンがクリックされた時の挙動
   const handleSubmit = async () => {
+
+    const ai_disabled = otherUsers && otherUsers.length > 1
+
     try {
       // Clear the input field
       setText("");
 
-      setTimeout(async () => {
-        // ローディング状態を有効にする
-        setIsLoading(true);
-      }, 1500);
+      if (ai_disabled) {
+        setTimeout(async () => {
+          // ローディング状態を有効にする
+          setIsLoading(true);
+        }, 1500);
+      }
 
       if (!userInfo) return;
 
@@ -342,6 +371,7 @@ const Index = () => {
       await createChat(chatInfo);
       setMessages(prevMessages => prevMessages ? [...prevMessages, chatInfo] : [chatInfo]);
 
+      if (ai_disabled) {
       // AI response
       const aiMessage = await sendToAI(text);
       const aiChatInfo: ChatType = {
@@ -356,6 +386,7 @@ const Index = () => {
         // Send AI chat info to the API to create a chat
         await createChat(aiChatInfo);
         setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
+      }
       }
       // ローディング状態を無効にする
       setIsLoading(false);
@@ -411,6 +442,25 @@ const Index = () => {
 
     }
   };
+
+  const restaurant = async() => {
+    const aiChatInfo: ChatType = {
+      chatId: uuid(),
+      chatRoomId: roomId,
+      user_id: "AI",
+      message: "ここ２人にぴったりだと思うよー！☺️",
+      createdAt: new Date().getTime(),
+      isImage: false,
+    };
+
+    if (aiChatInfo.message) {
+      // Wait for 1 seconds
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Send AI chat info to the API to create a chat
+      await createChat(aiChatInfo);
+      setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
+    }
+  }
   
   if (!userInfo) return <></>;
 
@@ -499,6 +549,41 @@ const Index = () => {
                 </Box>
                 </>
               )}
+              {message.message === "ここ２人にぴったりだと思うよー！☺️" && message.user_id === "AI"/*特定のメッセージID*/ && (
+                <>
+                <Box overflowX="scroll">
+                <Grid
+                  templateColumns="repeat(3, 1fr)" // 2列のレイアウト
+                  gap={4} // 画像間のスペース
+                  width={"800px"} // 最大幅375px
+                  // height={375}
+                  px={5}
+                  marginX="auto" // 水平方向に中央揃え
+                >
+                   {images_rest.map((image, index) => (
+                      <Box key={index}>
+                        <Image
+                          src={image.url}
+                          rounded="md"
+                          width={400}
+                          height={130}
+                          objectFit="cover"
+                          onClick={() => handleImageClick(image.url)}
+                          _hover={{ cursor: "pointer" }}
+                        />
+                        <Box bg="#444444" color="white" rounded="lg"  mt={2} fontSize="small" fontWeight="bold" boxShadow="base">
+                          <Text p={0.5} pt={1} px={2}>店舗名 : {image.storeName}</Text>
+                          <Divider my={0.5}  borderColor="white" borderWidth={1.2}/>
+                          <Text p={0.5} px={2}>価格帯 : {image.priceRange}</Text>
+                          <Divider my={0.5}  borderColor="white" borderWidth={1.2}/>
+                          <Text p={0.5} pb={1} px={2}>エリア : {image.area}</Text>
+                        </Box>
+                      </Box>
+                    ))}
+                </Grid>
+                </Box>
+                </>
+              )}
             </React.Fragment>
           );
         })}
@@ -562,8 +647,8 @@ const Index = () => {
           </Box>
         </Flex>
 
-        {showRequestBox && (
-            <Box
+        {(showRequestBox && otherUsers && otherUsers.length <= 1) && (
+            <Box 
               fontSize="12px"
               fontWeight="bold"
               color="#dd6b63"
@@ -579,6 +664,44 @@ const Index = () => {
             >
               マッチングを依頼する
             </Box>
+          )}
+
+          {(showRequestBox && otherUsers && otherUsers.length > 1) && (
+            <>        
+            <Box 
+              fontSize="12px"
+              fontWeight="bold"
+              color="#dd6b63"
+              borderWidth="1px"
+              borderRadius="md"
+              bg="white"
+              borderColor="#dd6b63"
+              p="1"
+              px="10px"
+              ml="5px"
+              mr="10px"
+              _hover={{ cursor: "pointer", transform: "translateY(2px)" }}
+              onClick={restaurant}
+            >
+              お店を聞く
+            </Box>
+            <Box 
+            fontSize="12px"
+            fontWeight="bold"
+            color="#dd6b63"
+            borderWidth="1px"
+            borderRadius="md"
+            bg="white"
+            borderColor="#dd6b63"
+            p="1"
+            px="10px"
+            ml="0"
+            _hover={{ cursor: "pointer", transform: "translateY(2px)" }}
+            onClick={requestMatching}
+          >
+            気まずい...🥺
+          </Box>
+          </>
           )}
       </Flex>
 
