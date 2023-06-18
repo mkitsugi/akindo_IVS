@@ -69,26 +69,30 @@ export default function Home() {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
+      maxheight="100vh"
     >
+
+      
       <Container
         maxW="container.xl"
         display="flex"
         flexDirection="column"
-        // alignItems="center"
-        // justifyContent="center"
-        height="100%"
+        alignItems="center"
+        justifyContent="center"
       >
+
+        
 
         <VStack
           direction="row"
           spacing={4}
-          // alignContent="center"
-          // justifyContent="center"
-          mt={10}
-          height="100%"
+          align="center" // コンテンツを上下中央に配置
+          justifyContent="center"
+          height="80vh"
         >
 
-          <Heading as="h1" size="3xl" color="black" mt="30%">
+
+          <Heading as="h1" size="3xl" color="black">
               Welcome to Osekk.ai!
           </Heading>
 
@@ -109,7 +113,6 @@ export default function Home() {
             </Text>
           </Link>
 
-          <Spacer />
         </VStack>
       </Container>
     </MotionBox>

@@ -6,6 +6,8 @@ import {
   Box,
   Container,
   Avatar,
+  Image,
+  Grid
 } from "@chakra-ui/react";
 import { useSpring, animated } from "react-spring";
 import { ChevronLeftIcon, HamburgerIcon, ChevronRightIcon, ChevronDownIcon } from "@chakra-ui/icons";
@@ -25,6 +27,49 @@ import { UserType } from "@/types/user/userType";
 import React from "react";
 
 const Index = () => {
+
+  const images = [
+    "/images/sample_1.jpeg",
+    "/images/sample_2.jpeg",
+    "/images/sample_3.jpeg",
+    "/images/sample_4.jpeg",
+  ];
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const handleImageClick = async (src: string) => {
+    setSelectedImage(src);
+
+
+    const aiChatInfo: ChatType = {
+      chatId: uuid(),
+      chatRoomId: roomId,
+      user_id: "AI",
+      message: "この人がいいんだね！じゃあ一旦グルチャ作るね！下から入って欲しいな☺️",
+      createdAt: new Date().getTime(),
+      isImage: false,
+    };
+
+    if (aiChatInfo.message) {
+      
+      setTimeout(async () => {
+        // ローディング状態を有効にする
+        setIsLoading(true);
+      }, 1500);
+
+      // Wait for 3 seconds
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      // Send AI chat info to the API to create a chat
+      await createChat(aiChatInfo);
+      setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
+
+      setIsLoading(false);
+    }
+    // 画像がクリックされた際に実行するアクションをここに書く
+    console.log("画像がクリックされました:", src);
+  };
+
+
   const router = useRouter();
 
   const windowHeight = useWindowHeight();
@@ -108,6 +153,7 @@ const Index = () => {
             };
             // Send chat info to the API to create a chat
             await createChat(chatInfo);
+
             setMessages(prevMessages => prevMessages ? [...prevMessages, chatInfo] : [chatInfo]);
 
             const aiChatInfo: ChatType = {
@@ -121,12 +167,18 @@ const Index = () => {
 
             if (aiChatInfo.message) {
               
+              setTimeout(async () => {
+                // ローディング状態を有効にする
+                setIsLoading(true);
+              }, 1500);
               // Wait for 3 seconds
               await new Promise(resolve => setTimeout(resolve, 3000));
 
               // Send AI chat info to the API to create a chat
               await createChat(aiChatInfo);
               setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
+
+              setIsLoading(false);
             }
 
           } else {
@@ -139,11 +191,6 @@ const Index = () => {
     }
   };
   
-
-  const handleSubmitWithImage = () => {
-    // TODO: Implement image upload logic here
-    // selectedFile contains the file to be uploaded
-  };
 
   // メッセージ配列の状態を管理
   const [messages, setMessages] = useState<ChatType[]>();
@@ -268,8 +315,6 @@ const Index = () => {
         isImage: false,
       };
 
-      console.log("chatInfo", chatInfo);
-
       // Send chat info to the API to create a chat
       await createChat(chatInfo);
       setMessages(prevMessages => prevMessages ? [...prevMessages, chatInfo] : [chatInfo]);
@@ -301,16 +346,47 @@ const Index = () => {
   const sendToAI = async (message: string) => {
     try {
       const response = await axios.post("/api/chat_gptResponse", { message, roomId });
-      console.log("API Response:", response); // APIのレスポンスを確認
       return response.data;
     } catch (e) {
       console.error("API Error:", e); // APIからのエラーを確認
     }
   };
 
-  const requestMatching = () => {
-    // マッチング依頼の処理をここに書く
-    console.log('マッチングを依頼しました。');
+  const requestMatching = async() => {
+
+    setShowRequestBox(false);
+
+    const aiChatInfo: ChatType = {
+      chatId: uuid(),
+      chatRoomId: roomId,
+      user_id: "AI",
+      message: "りょーかい！ちょっと探してみるね！👍",
+      createdAt: new Date().getTime(),
+      isImage: false,
+    };
+
+    if (aiChatInfo.message) {
+      // Wait for 1 seconds
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Send AI chat info to the API to create a chat
+      await createChat(aiChatInfo);
+      setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
+
+      // Wait for 1 seconds
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      const aiChatInfo_: ChatType = {
+        chatId: uuid(),
+        chatRoomId: roomId,
+        user_id: "AI",
+        message: "何人か見つけたよー！\nこんな人たちどうかなー？写真送るね！\n気になる人はクリックしてみて👍",
+        createdAt: new Date().getTime(),
+        isImage: false,
+      };
+
+      await createChat(aiChatInfo_);
+      setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo_] : [aiChatInfo_]);
+
+    }
   };
   
   if (!userInfo) return <></>;
@@ -354,23 +430,55 @@ const Index = () => {
         flexGrow={1}
         ref={messagesEndRef}
       >
-        {/* <Message key={message.chatId} chat={message} isSender={true} /> */}
         {messages?.map((message) => {
-
           const isUserMessage = message.user_id !== userInfo.id; // Check if the message is sent by the user
           const otherUser = otherUsers?.find(user => user.id === message.user_id);
           const avatarSrc = otherUser ? otherUser.pfp : undefined;
 
-          console.log("Avatar",avatarSrc);
           return (
-            <Message
-              key={message.chatId}
-              chat={message}
-              imgSrc={avatarSrc}
-              isSender={isUserMessage}
-            />
+            <React.Fragment key={message.chatId}>
+              <Message
+                key={message.chatId}
+                chat={message}
+                imgSrc={avatarSrc}
+                isSender={isUserMessage}
+              />
+
+              {message.message === "この人がいいんだね！じゃあ一旦グルチャ作るね！下から入って欲しいな☺️" && message.user_id === "AI"/*特定のメッセージID*/ && (
+                <>
+                {selectedImage ? (
+                <Box bg="#319795" color="white" rounded="md" mx={5} py={2} textAlign="center" >
+                 <Text fontSize="sm" fontWeight="bold">グループチャットに参加する</Text>
+                </Box>
+              ): <></>}
+                </>
+              )}
+              {message.message === "りょーかい！ちょっと探してみるね！👍" && message.user_id === "AI"/*特定のメッセージID*/ && (
+                <>
+                <Box bg="#319795" color="white" p={1} py={2} textAlign="center">
+                  <Text fontWeight="bold">お相手を探してくれています...</Text>
+                </Box>
+                </>
+              )}
+              {message.message === "何人か見つけたよー！\nこんな人たちどうかなー？写真送るね！\n気になる人はクリックしてみて👍" && message.user_id === "AI"/*特定のメッセージID*/ && (
+                <>
+                <Grid
+                  templateColumns="repeat(2, 1fr)" // 2列のレイアウト
+                  gap={4} // 画像間のスペース
+                  maxW={375} // 最大幅375px
+                  px={5}
+                  marginX="auto" // 水平方向に中央揃え
+                >
+                  {images.map((src, index) => (
+                    <Image key={index} src={src} rounded="md"  objectFit="cover" onClick={() => handleImageClick(src)} _hover={{ cursor: "pointer"}}/>
+                  ))}
+                </Grid>
+                </>
+              )}
+            </React.Fragment>
           );
         })}
+
         {isLoading ? (
           <Flex gap={5} mx={"1rem"} direction={"row"} alignItems="center">
             <Avatar src={"/" + aiInfo.pfp} size={"sm"} />
@@ -433,12 +541,14 @@ const Index = () => {
         {showRequestBox && (
             <Box
               fontSize="12px"
-              color="white"
-              borderWidth="1.5px"
+              fontWeight="bold"
+              color="#dd6b63"
+              borderWidth="1px"
               borderRadius="md"
-              bg="#dd6b63"
+              bg="white"
               borderColor="#dd6b63"
               p="1"
+              px="10px"
               ml="0"
               _hover={{ cursor: "pointer", transform: "translateY(2px)" }}
               onClick={requestMatching}
