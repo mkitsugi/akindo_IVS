@@ -66,6 +66,8 @@ def get_item_name(message: str) -> str:
 
 
 def change_to_JSON(property: list) -> dict:
+    if len(property) % 2 == 1:
+        return 0
     dicts = [{property[i]: property[i + 1]} for i in range(0, len(property), 2)]
     # Pythonの辞書リストをJSON形式の文字列に変換
     json_str = json.dumps(dicts, ensure_ascii=False)
@@ -144,7 +146,8 @@ def main() -> None:
     # Validationでstring以外が入ってこないようにする
     # case文で userInputTypeの"質問"ごとに処理を実行
 
-    test_message = "私は27歳の女です. 趣味はランニングで好きなものはレモンです."
+    # test_message = "私は27歳の女です. 趣味はランニングで好きなものはレモンです."
+    test_message = "私はいつまでもこのままでいたいと考えています"
     # test_message = "横浜市、町田市、相模原市、大磯町、これらの共通点は？"
     response = get_item_name(test_message)
     print("response: ", response)
@@ -158,7 +161,7 @@ def main() -> None:
         function_call="auto",
     )
     message = response["choices"][0]["message"]
-    print("message: ", message)
+    print("message: ", message["content"])
     if message.get("function_call"):
         # 関数を使用すると判断された場合
 
@@ -196,8 +199,7 @@ def main() -> None:
                     },
                 ],
             )
-
-    print(second_response.choices[0]["message"]["content"].strip())
+            print(second_response.choices[0]["message"]["content"].strip())
 
     # 依頼 //Todoマッチング依頼にする
     # 依頼用のbase_prompt
