@@ -105,24 +105,6 @@ useEffect(() => {
     });
   }, [userInfo, chatrooms]);
 
-  
-  // useEffect(() => {
-  //   if (!userInfo || !chatrooms.length) return;
-
-  //   const otherUserIds = chatrooms.map(room => {
-  //     if (room && Array.isArray(room.participants_id)) {
-  //       const otherIds =room.participants_id.filter(id => id !== userInfo.id);
-  //       return otherIds;
-  //     }
-  //     return [];
-  //   }).filter(Boolean);
-
-  //   Promise.all(otherUserIds.flat().map(id => id && getUser(id)))
-  //   .then(users => users.filter((user): user is UserType => user !== null && user !== undefined))
-  //   .then(setOtherUsers);
-  //   console.log("R:", otherUsers);
-  // }, [userInfo, chatrooms]);
-
   if (!userInfo) return <></>;
 
   return (
@@ -174,20 +156,6 @@ useEffect(() => {
               unreadMessages={unreadMessages}
             />
             );
-          // }
-
-          // if (participantCount === 3) {
-          //   return(
-          //     <ChatCard
-          //       key={chatroom.chatroomId}
-          //       userInfo={correspondingUser}
-          //       ChatRoomInfo={chatroom}
-          //       ChatInfo={chat}
-          //       unreadMessages={unreadMessages}
-          //     />
-          //     );
-          // }
-
         })}
       </VStack>
 
