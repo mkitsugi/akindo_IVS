@@ -53,7 +53,6 @@ def main(req: HttpRequest) -> HttpResponse:
                {history}
                Human: {human_input}
                Assistant:
-
                """
 
     prompt = PromptTemplate(
@@ -82,3 +81,5 @@ def main(req: HttpRequest) -> HttpResponse:
     session_memory[session_id]["messages"].append({"role": "assistant", "content": ai_response})
 
     return HttpResponse(ai_response)
+
+#たかもとさん動作確認用

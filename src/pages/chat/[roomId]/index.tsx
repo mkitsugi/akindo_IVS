@@ -7,9 +7,10 @@ import {
   Container,
   Avatar,
 } from "@chakra-ui/react";
-import { ChevronLeftIcon, HamburgerIcon } from "@chakra-ui/icons";
+import { useSpring, animated } from "react-spring";
+import { ChevronLeftIcon, HamburgerIcon, ChevronRightIcon, ChevronDownIcon } from "@chakra-ui/icons";
 import { useState, useEffect, useRef } from "react";
-import { BiPaperPlane } from "react-icons/bi";
+import { BiPaperPlane, BiPaperclip } from "react-icons/bi";
 import axios from "axios";
 import { useRouter } from "next/router";
 import { getAI } from "@/components/models/ai";
@@ -21,6 +22,7 @@ import { uuid } from "uuidv4";
 import { useWindowHeight } from "@/hooks/useWindow";
 import { ChatRoomType } from "@/types/chat/chatRoomType";
 import { UserType } from "@/types/user/userType";
+import React from "react";
 
 const Index = () => {
   const router = useRouter();
@@ -37,6 +39,93 @@ const Index = () => {
   const [userInfo, setUserInfo] = useState<UserType | null>(null);
   const [chatrooms, setChatrooms] = useState<ChatRoomType[]>([]);
   const [otherUsers, setOtherUsers] = useState<UserType[] | undefined>([]);
+
+
+  // ファイル入力フィールドへの参照を作成
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  // アイコンがクリックされたときのハンド
+  const handleIconClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  //画像アップロード用
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+
+  const handleImageUpload = async(e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!userInfo) {
+      console.log("User info is null");
+      return; // or handle this case appropriately
+    }
+  
+    const files = e.target.files;
+  
+    if (files && files.length > 0) {
+      const file = files[0];
+  
+      // Convert the file to an ArrayBuffer, then Base64 encode it
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const arrayBuffer = event.target?.result;
+  
+        if (arrayBuffer instanceof ArrayBuffer) {
+          const base64 = btoa(
+            new Uint8Array(arrayBuffer)
+              .reduce((data, byte) => data + String.fromCharCode(byte), '')
+          );
+  
+          // APIエンドポイントにPOST
+          const response = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ file: base64 }),
+          });
+  
+          // レスポンスからアップロードされた画像のURLを取得
+        console.log("response", response);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Uploaded image URL:', data.imageUrl);
+
+          // Use the uploaded image URL to update the user's imgSrc in the database
+          const updateResponse = await fetch('/api/user_update_img', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userInfo.id, imageUrl: data.imageUrl }),
+          });
+
+          if (updateResponse.ok) {
+            console.log('Updated user imgSrc successfully');
+
+            // User message
+            const chatInfo: ChatType = {
+              chatId: uuid(),
+              chatRoomId: roomId,
+              user_id: userInfo.id,
+              message: data.imageUrl,
+              createdAt: new Date().getTime(),
+              isImage: true,
+            };
+
+            // Send chat info to the API to create a chat
+            await createChat(chatInfo);
+            setMessages(prevMessages => prevMessages ? [...prevMessages, chatInfo] : [chatInfo]);
+
+          } else {
+            console.error('Failed to update user imgSrc');
+          }
+        }
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+  
+
+  const handleSubmitWithImage = () => {
+    // TODO: Implement image upload logic here
+    // selectedFile contains the file to be uploaded
+  };
 
   // メッセージ配列の状態を管理
   const [messages, setMessages] = useState<ChatType[]>();
@@ -65,9 +154,26 @@ const Index = () => {
     };
   }, []);
 
+  //矢印ボタン
+  const [showRequestBox, setShowRequestBox] = useState(false);
+  const { transform } = useSpring({
+    // アイコンが真っ直ぐ（0deg）または下向き（90deg）になる
+    transform: showRequestBox ? "rotate(0deg)" : "rotate(90deg)",
+  });
+
 
   //スクロール部分表示操作
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  };
 
   //Localのユーザーデータの取得
   useEffect(() => {
@@ -89,7 +195,7 @@ const Index = () => {
   }
   },[router.isReady, router.query]);
 
-  //
+  //別ユーザーのidを取得
   useEffect(() => {
     if (!userInfo || !chatrooms.length) return;
 
@@ -115,16 +221,6 @@ const Index = () => {
     });
   }, [userInfo, chatrooms]);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  };
 
   //入力ボタンがクリックされた時の挙動
   const handleSubmit = async () => {
@@ -146,6 +242,7 @@ const Index = () => {
         user_id: userInfo.id,
         message: text,
         createdAt: new Date().getTime(),
+        isImage: false,
       };
 
       console.log("chatInfo", chatInfo);
@@ -162,6 +259,7 @@ const Index = () => {
         user_id: "AI",
         message: aiMessage,
         createdAt: new Date().getTime(),
+        isImage: false,
       };
       if (aiChatInfo.message) {
         // Send AI chat info to the API to create a chat
@@ -275,6 +373,52 @@ const Index = () => {
       {/* <Spacer /> */}
 
       <Container maxW="95%" p={10} padding="0">
+
+      <Flex
+          alignItems={"center"}
+          mb="1rem"
+        >
+        <Flex
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            px="1rem"
+            mb="1rem"
+          >
+          <Box
+            as="button"
+            w="30px"
+            h="30px"
+            borderRadius="full"
+            bgColor="white"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            onClick={() => setShowRequestBox(!showRequestBox)}
+            _hover={{ bgColor: "#f7fafc" }}
+          >
+            <animated.div style={{ transform }}>
+              <ChevronRightIcon fontSize={"24px"} />
+            </animated.div>
+          </Box>
+        </Flex>
+
+        {showRequestBox && (
+            <Box
+              fontSize="12px"
+              color="white"
+              borderWidth="1.5px"
+              borderRadius="md"
+              bg="#dd6b63"
+              borderColor="#dd6b63"
+              p="1"
+              ml="0" // Boxコンポーネントが直接ボタンにくっつかないように、左マージンを追加します
+              mb="1rem"
+            >
+              マッチングを依頼する
+            </Box>
+          )}
+      </Flex>
+
         <Flex
           gap={2}
           p={3}
@@ -299,11 +443,36 @@ const Index = () => {
                 setEnterPressed(false);
               }
             }}
-            placeholder="メッセージを入力してください..."
+            placeholder="メッセージを入力..."
             border="none"
             onFocus={() => setInputFocus(true)}
             onBlur={() => setInputFocus(false)}
           />
+
+            <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+            />  
+            <Box
+              as="button"
+              cursor="pointer"
+              w="45px"
+              h="40px"
+              // bgColor="#EF7C76"
+              // borderRadius="full"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              onClick={handleIconClick}
+              _active={{
+                transform: "scale(0.95)",
+              }}
+            >
+              <BiPaperclip color="black" size="20px" />
+            </Box>
           <Box
             as="button"
             cursor="pointer"

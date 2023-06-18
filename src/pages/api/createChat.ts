@@ -5,7 +5,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   console.log("req.body", req.body);
 
   if (req.method === "POST") {
-    const { chatRoomId, user_id, message } = req.body;
+    const { chatRoomId, user_id, message, isImage } = req.body;
 
     try {
       await cosmosClient.database
@@ -15,6 +15,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           user_id : user_id,
           message : message,
           createdAt : Date.now(),
+          isImage: isImage,
         });
 
       res.status(201).json({ success: true });
