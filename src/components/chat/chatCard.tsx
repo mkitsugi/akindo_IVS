@@ -65,7 +65,7 @@ export function ChatCard(props: PropsType): JSX.Element {
             {props.unreadMessages > 0 && (
               <Badge
                 colorScheme="pink"
-                color="black"
+                color={props.ChatInfo.isImage ? "blue" : "black"}
                 borderRadius="full"
                 width="24px"
                 height="24px"
@@ -73,7 +73,7 @@ export function ChatCard(props: PropsType): JSX.Element {
                 alignItems="center"
                 justifyContent="center"
               >
-                {props.unreadMessages}
+                {props.ChatInfo.isImage ? "画像が送られています" : props.unreadMessages}
               </Badge>
             )}
           </Flex>

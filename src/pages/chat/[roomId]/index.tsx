@@ -106,10 +106,28 @@ const Index = () => {
               createdAt: new Date().getTime(),
               isImage: true,
             };
-
             // Send chat info to the API to create a chat
             await createChat(chatInfo);
             setMessages(prevMessages => prevMessages ? [...prevMessages, chatInfo] : [chatInfo]);
+
+            const aiChatInfo: ChatType = {
+              chatId: uuid(),
+              chatRoomId: roomId,
+              user_id: "AI",
+              message: "画像受け取ったよ！ありがと😊",
+              createdAt: new Date().getTime(),
+              isImage: false,
+            };
+
+            if (aiChatInfo.message) {
+              
+              // Wait for 3 seconds
+              await new Promise(resolve => setTimeout(resolve, 3000));
+
+              // Send AI chat info to the API to create a chat
+              await createChat(aiChatInfo);
+              setMessages(prevMessages => prevMessages ? [...prevMessages, aiChatInfo] : [aiChatInfo]);
+            }
 
           } else {
             console.error('Failed to update user imgSrc');
@@ -164,9 +182,6 @@ const Index = () => {
 
   //スクロール部分表示操作
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({
@@ -174,6 +189,10 @@ const Index = () => {
       block: "end",
     });
   };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
   //Localのユーザーデータの取得
   useEffect(() => {
@@ -285,6 +304,11 @@ const Index = () => {
     }
   };
 
+  const requestMatching = () => {
+    // マッチング依頼の処理をここに書く
+    console.log('マッチングを依頼しました。');
+  };
+  
   if (!userInfo) return <></>;
 
   return (
@@ -368,6 +392,7 @@ const Index = () => {
         ) : (
           <></>
         )}
+        <div ref={messagesEndRef} />
       </Flex>
 
       {/* <Spacer /> */}
@@ -382,7 +407,6 @@ const Index = () => {
             alignItems={"center"}
             justifyContent={"space-between"}
             px="1rem"
-            mb="1rem"
           >
           <Box
             as="button"
@@ -411,8 +435,9 @@ const Index = () => {
               bg="#dd6b63"
               borderColor="#dd6b63"
               p="1"
-              ml="0" // Boxコンポーネントが直接ボタンにくっつかないように、左マージンを追加します
-              mb="1rem"
+              ml="0"
+              _hover={{ cursor: "pointer", transform: "translateY(2px)" }}
+              onClick={requestMatching}
             >
               マッチングを依頼する
             </Box>
