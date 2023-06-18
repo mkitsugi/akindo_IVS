@@ -184,10 +184,14 @@ const Index = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
+    const container = messagesEndRef.current;
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+    // messagesEndRef.current?.scrollIntoView({
+    //   behavior: "smooth",
+    //   block: "end",
+    // });
   };
 
   useEffect(() => {
