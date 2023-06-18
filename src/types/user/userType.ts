@@ -4,5 +4,6 @@ export type UserType = {
   userName: string;
   age: number;
   job: string;
+  gender: string;
   createdAt: string;
 };
