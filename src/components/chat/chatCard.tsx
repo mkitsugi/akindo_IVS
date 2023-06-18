@@ -57,15 +57,15 @@ export function ChatCard(props: PropsType): JSX.Element {
 
           <Flex >
             <Box maxWidth="230px">
-              <Text isTruncated whiteSpace="nowrap" > 
-                 {ChatInfo && ChatInfo.message}
+              <Text isTruncated whiteSpace="nowrap" color={props.ChatInfo.isImage ? "blue" : "black"} > 
+                 {ChatInfo && props.ChatInfo.isImage ? "画像が送られています" : ChatInfo.message}
               </Text>
             </Box>
             <Spacer />
             {props.unreadMessages > 0 && (
               <Badge
                 colorScheme="pink"
-                color={props.ChatInfo.isImage ? "blue" : "black"}
+                color="black"
                 borderRadius="full"
                 width="24px"
                 height="24px"
@@ -73,7 +73,7 @@ export function ChatCard(props: PropsType): JSX.Element {
                 alignItems="center"
                 justifyContent="center"
               >
-                {props.ChatInfo.isImage ? "画像が送られています" : props.unreadMessages}
+                {props.unreadMessages}
               </Badge>
             )}
           </Flex>
