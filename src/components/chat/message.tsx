@@ -1,6 +1,6 @@
 import React from "react";
 import { ChatType } from "@/types/chat/chatType";
-import { Avatar, Flex, Text, Box } from "@chakra-ui/react";
+import { Avatar, Flex, Text, Box, Image } from "@chakra-ui/react";
 import { getUser } from "../models/user";
 import { useEffect, useState } from "react";
 import { UserType } from "@/types/user/userType";
@@ -38,16 +38,28 @@ export function Message(props: PropsType): JSX.Element {
 
       <Box
         p={2}
-        bgColor={isSender ? "#EF7C76" : "white"}
+        bgColor={isSender ? props.chat.isImage ? "" : "#EF7C76" : "white"}
         color={isSender ? "white" : "black"}
         borderRadius={"10px"}
         maxWidth={"75%"}
       >
-        <Text p={1} pl={1} wordBreak={"break-word"} overflowWrap={"break-word"}>
-        {props.chat.message.split('\n').map((str, index) => 
-            <React.Fragment key={index}>{str}<br /></React.Fragment>
-          )}
-        </Text>
+        {props.chat.isImage ? (
+          <Image src={props.chat.message} borderRadius="2xl" alt="イメージを読み込めませんでした" />
+        ) : (
+          <Text
+            p={1}
+            pl={1}
+            wordBreak={"break-word"}
+            overflowWrap={"break-word"}
+          >
+            {props.chat.message.split('\n').map((str, index) => (
+              <React.Fragment key={index}>
+                {str}
+                <br />
+              </React.Fragment>
+            ))}
+          </Text>
+        )}
       </Box>
     </Flex>
   );

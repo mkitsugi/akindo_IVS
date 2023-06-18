@@ -1,5 +1,4 @@
 import json
-
 import numpy as np
 import pandas as pd
 
@@ -23,3 +22,6 @@ for item in data:
         messages.append(item["message"])
 
 print(messages)
+
+#userのチャットメッセージだけ取ってくる
+#llama_indexにコピペで投げている
