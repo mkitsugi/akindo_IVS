@@ -43,6 +43,7 @@ ASK_QUESTION_TYPE_TEMPLATE = """
 
     #出力:
     """
+
 ##分類処理
 def judge_conversation_type(userinput: str) -> str:
 
@@ -148,18 +149,16 @@ def main(req: HttpRequest) -> HttpResponse:
             # user_id = req_body.get('user_id')  # user_idをクライアント側から取得
             chatroomid = req_body.get('roomId')  # chatroomidをクライアント側から取得
  
-
     if initial_message:
         # messages.append({"role": "user", "content": initial_message})
-
         response = judge_conversation_type(userinput=initial_message)
         # response = openai.ChatCompletion.create(model="gpt-3.5-turbo-16k-0613", messages=messages)
         # ai_response = response["choices"][0]["message"]["content"]
         chatsoutput = get_Chats_from_cosmos(chatroomid=chatroomid)
         output = output_from_memory(Chats=chatsoutput,initial_message=initial_message)
         # response_body = json.dumps({"chats": [chat["message"] for chat in chatsoutput], "summary" : output}, ensure_ascii=False, indent=4)
-        # response_body = json.dumps({"chats": chatsoutput, "summary" : output}, ensure_ascii=False, indent=4)
-        # return HttpResponse(response_body)
-        return HttpResponse(output)
+        response_body = json.dumps({"chats": chatsoutput, "summary" : output}, ensure_ascii=False, indent=4)
+        return HttpResponse(response_body)
+        # return HttpResponse(output)
     else:
         return HttpResponse("Please pass a message on the query string or in the request body", status_code=400)
