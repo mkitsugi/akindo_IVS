@@ -24,7 +24,23 @@ User: {question}
 AI:
 """
 
-base_prompt = """あなたは以下の設定を持ったchatbotです
+ASK_QUESTION_TYPE_TEMPLATE = """
+    ###指令###_
+    あなたはユーザーのチャット相手として、返答します。
+    また、あなたは会話を通じて、相手のメッセージに相手に関する具体的な情報が含まれているかを判断します。
+    以下の形式で出力をしてください。
+
+    jsonフォーマット:
+    ```
+    "UserInputType" : "情報量あり" or "情報量なし"
+    ```
+
+    #質問: {question}
+
+    #出力:
+    """
+
+BASE_PROMPT = """あなたは以下の設定を持ったchatbotです
                # 設定
                - あなたは相手の恋愛相談に乗る女性の友達です
                - あなたは聞き役に徹して相手の説明した内容に対して共感をすることに徹してください
@@ -58,7 +74,7 @@ llm = ChatOpenAI(temperature=0)
 def get_item_name(message: str) -> str:
     prompt = PromptTemplate(
         input_variables=["question"],
-        template=SAMPLR_RESPONSE_TEMPLATE,
+        template=ASK_QUESTION_TYPE_TEMPLATE,
     )
     chain = LLMChain(llm=llm, prompt=prompt)
     result = chain.run(question=message).strip()
@@ -66,6 +82,9 @@ def get_item_name(message: str) -> str:
 
 
 def change_to_JSON(property: list) -> dict:
+    if len(property) % 2 == 1:
+        tmp = """{"好きな国": "日本"}"""
+        return tmp
     dicts = [{property[i]: property[i + 1]} for i in range(0, len(property), 2)]
     # Pythonの辞書リストをJSON形式の文字列に変換
     json_str = json.dumps(dicts, ensure_ascii=False)
@@ -95,37 +114,6 @@ functions = [
         },
     }
 ]
-# functions = [
-#     # AIが、質問に対してこの関数を使うかどうか、
-#     # また使う時の引数は何にするかを判断するための情報を与える
-#     {
-#         "name": "change_to_JSON",
-#         "description": "リスト形式からJSON形式に変換する",
-#         "parameters": {
-#             "type": "object",
-#             "properties": {
-#                 # property引数の情報
-#                 "property": {
-#                     "type": "string",
-#                     "description": """市区町村名入力。半角カンマ区切りで複数要素を入力可能。各要素は「xx市」「xx区」「xx町」「xx村」のいずれか。例: 世田谷区,大阪市,府中町,山中湖村""",
-#                 },
-#             },
-#             "required": ["property"],
-#         },
-#     }
-# ]
-# def chat(message, history):
-#     history = history or []
-#     judged = judge_question_type(message)
-
-#     answer = ""
-#     if USER_QUESTION_TYPE_1 in judged:
-#         answer = conversation.predict(input=message)
-#     if USER_QUESTION_TYPE_2 in judged:
-#         item_name = get_item_name(message)
-#         answer = get_item_review(message, item_name)
-#     history.append((message, answer))
-#     return history, history
 
 
 def main() -> None:
@@ -136,7 +124,7 @@ def main() -> None:
     # { 性別 } { 名前 } { 年齢 } { 職業/肩書き }も入れたい
 
     initial_message = "こんにちは。昨日は何してたの？？"
-    messages.append({"role": "system", "content": base_prompt})
+    messages.append({"role": "system", "content": BASE_PROMPT})
     messages.append({"role": "user", "content": initial_message})
 
     # output : userInputType : "質問"
@@ -147,32 +135,33 @@ def main() -> None:
     test_message = "私は27歳の女です. 趣味はランニングで好きなものはレモンです."
     # test_message = "横浜市、町田市、相模原市、大磯町、これらの共通点は？"
     response = get_item_name(test_message)
-    print("response: ", response)
+    if "情報量あり" in response:
+        print("response: ", response)
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
-        messages=[
-            {"role": "user", "content": test_message},
-        ],
-        functions=functions,
-        function_call="auto",
-    )
-    message = response["choices"][0]["message"]
-    print("message: ", message)
-    if message.get("function_call"):
-        # 関数を使用すると判断された場合
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-0613",
+            messages=[
+                {"role": "user", "content": test_message},
+            ],
+            functions=functions,
+            function_call="auto",
+        )
+        message = response["choices"][0]["message"]
+        print("message: ", message)
+        if message.get("function_call") != 0:
+            # 関数を使用すると判断された場合
 
-        # 使うと判断された関数名
-        function_name = message["function_call"]["name"]
-        # その時の引数dict
-        # TODO LLMだとブレがあるのでフォーマットがおかしい時はもう一回とかの処理入れる
-        arguments = json.loads(message["function_call"]["arguments"])
+            # 使うと判断された関数名
+            function_name = message["function_call"]["name"]
+            # その時の引数dict
+            # TODO LLMだとブレがあるのでフォーマットがおかしい時はもう一回とかの処理入れる
+            arguments = json.loads(message["function_call"]["arguments"])
 
-        print("function_name: ", function_name)
-        print("arguments: ", arguments)
-        property_list = arguments.get("property")
-        if type(property_list) != list:
-            property_list = property_list.split(",")
+            print("function_name: ", function_name)
+            print("arguments: ", arguments)
+            property_list = arguments.get("property")
+            if type(property_list) != list:
+                property_list = property_list.split(",")
             print("property_list: ", property_list)
             # sample_json = change_to_JSON(property_list)
             function_response = globals()[function_name](property_list)
@@ -196,11 +185,16 @@ def main() -> None:
                     },
                 ],
             )
-
-    print(second_response.choices[0]["message"]["content"].strip())
-
+            print(second_response.choices[0]["message"]["content"].strip())
+    prompt = PromptTemplate(
+        input_variables=["question"],
+        template=BASE_PROMPT,
+    )
+    chain = LLMChain(llm=llm, prompt=prompt)
+    base_response = chain.run(question=test_message).strip()
+    print("base_response: ", base_response)
     # 依頼 //Todoマッチング依頼にする
-    # 依頼用のbase_prompt
+    # 依頼用のBASE_PROMPT
 
     # 雑談 // 普通にopenaiで返す
 
