@@ -1,6 +1,3 @@
-#以下のchatsoutputの出力形式
-#response_body = json.dumps({"chats": chatsoutput, "summary" : output}, ensure_ascii=False, indent=4)
-        
 [
     {
         "chat_room_id": "a45b5a46-7587-465d-9876-7b5c834c35e7",
