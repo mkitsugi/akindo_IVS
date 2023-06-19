@@ -342,13 +342,13 @@ const Index = () => {
   //入力ボタンがクリックされた時の挙動
   const handleSubmit = async () => {
 
-    const ai_disabled = otherUsers && otherUsers.length > 1
+    const ai_eabled = otherUsers && otherUsers.length <= 1
 
     try {
       // Clear the input field
       setText("");
 
-      if (ai_disabled) {
+      if (ai_eabled) {
         setTimeout(async () => {
           // ローディング状態を有効にする
           setIsLoading(true);
@@ -371,7 +371,7 @@ const Index = () => {
       await createChat(chatInfo);
       setMessages(prevMessages => prevMessages ? [...prevMessages, chatInfo] : [chatInfo]);
 
-      if (ai_disabled) {
+      if (ai_eabled) {
       // AI response
       const aiMessage = await sendToAI(text);
       const aiChatInfo: ChatType = {
@@ -501,6 +501,7 @@ const Index = () => {
         mb={"1rem"}
         overflowY="scroll"
         flexGrow={1}
+        
         ref={messagesEndRef}
       >
         {messages?.map((message) => {
@@ -551,22 +552,22 @@ const Index = () => {
               )}
               {message.message === "ここ２人にぴったりだと思うよー！☺️" && message.user_id === "AI"/*特定のメッセージID*/ && (
                 <>
-                <Box overflowX="scroll">
-                <Grid
-                  templateColumns="repeat(3, 1fr)" // 2列のレイアウト
-                  gap={4} // 画像間のスペース
-                  width={"800px"} // 最大幅375px
-                  // height={375}
-                  px={5}
-                  marginX="auto" // 水平方向に中央揃え
-                >
+                <Box height={"400px"} overflowX="scroll" overflowY="hidden" >
+                  <Grid
+                    templateColumns="repeat(3, 1fr)" // 2列のレイアウト
+                    gap={4} // 画像間のスペース
+                    // width={"800px"} 
+                    // height={375}
+                    px={5}
+                    marginX="auto" // 水平方向に中央揃え
+                  >
                    {images_rest.map((image, index) => (
                       <Box key={index}>
                         <Image
                           src={image.url}
                           rounded="md"
                           width={400}
-                          height={130}
+                          height={430}
                           objectFit="cover"
                           onClick={() => handleImageClick(image.url)}
                           _hover={{ cursor: "pointer" }}
@@ -614,6 +615,7 @@ const Index = () => {
           <></>
         )}
         <div ref={messagesEndRef} />
+       
       </Flex>
 
       {/* <Spacer /> */}
