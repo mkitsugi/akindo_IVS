@@ -1,24 +1,32 @@
-from asyncio import exceptions
-import os
-import openai
 import json
+import os
 import uuid
-from azure.functions import HttpRequest, HttpResponse
+from asyncio import exceptions
+
+import openai
 from azure.cosmos import CosmosClient, exceptions
+from azure.functions import HttpRequest, HttpResponse
+from dotenv import load_dotenv
 from langchain.memory import ConversationBufferMemory, ChatMessageHistory
 from langchain.schema import HumanMessage, AIMessage
 from langchain.chains import ConversationChain
 from langchain import LLMChain, PromptTemplate
+from langchain.chains import ConversationChain
 from langchain.chat_models import ChatOpenAI
-from dotenv import load_dotenv
+from langchain.memory import (
+    ChatMessageHistory,
+    ConversationBufferMemory,
+    ConversationEntityMemory,
+)
+from langchain.schema import AIMessage, HumanMessage
 
 # APIキーの取得
 load_dotenv()
-OPENAI_KEY = os.environ.get('OPENAI_API_KEY')
+OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
 openai.api_key = OPENAI_KEY
 
 # Cosmos DB接続設定
-COSMOS_DB_CONNECTION_STR = os.environ.get('COSMOS_DB_CONNECTION_STR')
+COSMOS_DB_CONNECTION_STR = os.environ.get("COSMOS_DB_CONNECTION_STR")
 DATABASE_NAME = "KG_AK"
 client = CosmosClient.from_connection_string(COSMOS_DB_CONNECTION_STR)
 database = client.get_database_client(DATABASE_NAME)
@@ -27,62 +35,67 @@ user_container = database.get_container_client("Users")
 prompt_container = database.get_container_client("Prompts")
 pref_container = database.get_container_client("Pref")
 
-#Prompt保管用のitem_id(仮置き)
+# Prompt保管用のitem_id(仮置き)
 item_id = "a085dd38-9318-48cc-a8f4-49f0e4866190"
 
-#llmモデルの設定
-llm = ChatOpenAI(temperature=0.3,model="gpt-3.5-turbo-16k-0613")
+# llmモデルの設定
+llm = ChatOpenAI(temperature=0.3, model="gpt-3.5-turbo-16k-0613")
 
-#プロンプトの取得
+
+# プロンプトの取得
 def get_prompts():
     item_id = "a085dd38-9318-48cc-a8f4-49f0e4866190"
     item = prompt_container.read_item(item=item_id, partition_key=item_id)
 
     return item
 
-#ユーザー情報の取得
-def get_user(user_id : str):
+
+# ユーザー情報の取得
+def get_user(user_id: str):
     user = user_container.read_item(item=user_id, partition_key=user_id)
     return user
 
-#ユーザー属性のアップロード
-def upload_userpref(user_id:str, response:dict)-> None:
+
+# ユーザー属性のアップロード
+def upload_userpref(user_id: str, response: dict) -> None:
     try:
         if response != "":
-            print("response:",response)
+            print("response:", response)
             response_dict = json.loads(response)
             response_dict["user_id"] = user_id
             response_dict["id"] = user_id
 
-            print("response_dict:",response_dict)
+            print("response_dict:", response_dict)
             # Add data to container
             pref_container.upsert_item(response_dict)
             print("Data inserted successfully.")
     except exceptions.CosmosResourceNotFoundError:
         print("Error.")
 
-def fetch_userpref(user_id:str):
+
+def fetch_userpref(user_id: str):
     try:
         pref = pref_container.read_item(item=user_id, partition_key=user_id)
         return pref
     except exceptions.CosmosResourceNotFoundError:
         return {}
-    
-def update_userpref(current:dict,new:dict)-> None:
 
+
+def update_userpref(current: dict, new: dict) -> None:
     existing_data = current
-    
+
     # 既存データと新しいデータの整合性を確認
     merged_data = {**existing_data, **new}
-    
+
     # 新しいデータが存在する場合はデータベースに更新
     if merged_data != existing_data:
         pref_container.upsert_item(merged_data)
-    
+
     return merged_data
 
+
 ##プロンプトテンプレート
-SUMMARY_QUESTION_TYPE_TEMPLATE="""
+SUMMARY_QUESTION_TYPE_TEMPLATE = """
 あなたはあなたが持っている情報を適切に要約して相手に説明するのが非常にうまいと思われている人間です。
 ユーザーからの応答に対して適切に返してください
 
@@ -154,7 +167,7 @@ BASE_PROMPT = """あなたは以下の設定を持ったchatbotです
 #                """
 
 
-#分類処理
+# 分類処理
 ##プロンプトテンプレート
 ASK_QUESTION_TYPE_TEMPLATE = """
     ###指令###_
@@ -170,9 +183,9 @@ ASK_QUESTION_TYPE_TEMPLATE = """
     #出力:
     """
 
+
 ##分類処理
 def judge_conversation_type(userinput: str) -> str:
-
     prompt = PromptTemplate(
         input_variables=["userinput"],
         template=ASK_QUESTION_TYPE_TEMPLATE,
@@ -180,14 +193,13 @@ def judge_conversation_type(userinput: str) -> str:
     chain = LLMChain(llm=llm, prompt=prompt)
     return chain.run(userinput=userinput).strip()
 
-#CosmosDBからデータを取得
+
+# CosmosDBからデータを取得
 def get_Chats_from_cosmos(chatroomid: str) -> list:
     query = f"SELECT * FROM c WHERE c.chat_room_id = '{chatroomid}'"
-    Chats = list(chat_container.query_items(
-        query=query,
-        enable_cross_partition_query=True
-    ))    
+    Chats = list(chat_container.query_items(query=query, enable_cross_partition_query=True))
     return Chats
+
 
 #Chatsをメモリー化して、出力
 # def output_from_memory(Chats: list, initial_message: str, userinfo:list,prompt: str):
@@ -204,7 +216,9 @@ def output_from_memory(Chats: list, initial_message: str,prompt: str):
 
     # Load messages into memory
     for chat in Chats:
-        message = HumanMessage(content=chat['message']) if chat['user_id'] != 'AI' else AIMessage(content=chat['message'])
+        message = (
+            HumanMessage(content=chat["message"]) if chat["user_id"] != "AI" else AIMessage(content=chat["message"])
+        )
 
         # Add the message to the memory
         if isinstance(message, HumanMessage):
@@ -214,16 +228,16 @@ def output_from_memory(Chats: list, initial_message: str,prompt: str):
     
     # memory.chat_memory.add_user_message(f"ユーザー属性は'${age,gender,job,name}'です")
 
-    prompt = PromptTemplate(template=prompt,input_variables=["history","input"]) 
+    prompt = PromptTemplate(template=prompt, input_variables=["history", "input"])
 
-    chain = ConversationChain(llm=llm, verbose=False, memory=memory,prompt=prompt)
+    chain = ConversationChain(llm=llm, verbose=False, memory=memory, prompt=prompt)
     summary = chain.predict(input=initial_message)
 
     return summary
 
-#情報量の有無を確認する
-def get_item_information(message: str, template:str) -> str:
 
+# 情報量の有無を確認する
+def get_item_information(message: str, template: str) -> str:
     prompt = PromptTemplate(
         input_variables=["userinput"],
         template=template,
@@ -242,7 +256,8 @@ def change_to_JSON(property: list) -> dict:
     json_str = json.dumps(dicts, ensure_ascii=False)
     return json_str
 
-#Function callingで使用するfunction
+
+# Function callingで使用するfunction
 functions = [
     # AIが、質問に対してこの関数を使うかどうか、
     # また使う時の引数は何にするかを判断するための情報を与える
@@ -269,10 +284,11 @@ functions = [
     }
 ]
 
-def main(req: HttpRequest) -> HttpResponse:
 
-    #messageの箱定義
+def main_inner(req: HttpRequest) -> HttpResponse:
+    # messageの箱定義
     messages = []
+
 
     #APIリクエストの受領
     initial_message = req.params.get('message')
@@ -289,10 +305,11 @@ def main(req: HttpRequest) -> HttpResponse:
             # user_id = req_body.get('user_id')  # user_idをクライアント側から取得
             chatroomid = req_body.get('roomId')  # chatroomidをクライアント側から取得
 
-    #promptsリストの受領
+    # promptsリストの受領
     prompts = get_prompts()
     messages.append({"role": "system", "content": prompts["BASE_PROMPT"]})
     messages.append({"role": "user", "content": initial_message})
+
 
     #user属性の取得
     # user = get_user(user_id)
@@ -313,19 +330,18 @@ def main(req: HttpRequest) -> HttpResponse:
             function_call="auto",
         )
 
-        #resのmessage部分を取得
+        # resのmessage部分を取得
         message = response["choices"][0]["message"]
 
         # 関数を使用すると判断された場合
-        if message.get("function_call") != 0:
-            
-            #エラーハンドリング
+        if message.get("function_call"):
+            # エラーハンドリング
             if "function_call" in message and "name" in message["function_call"]:
                 # 使うと判断された関数名
                 function_name = message["function_call"]["name"]
                 # TODO LLMだとブレがあるのでフォーマットがおかしい時はもう一回とかの処理入れる
                 arguments = json.loads(message["function_call"]["arguments"])
-                #property_listを取得
+                # property_listを取得
                 property_list = arguments.get("property")
                 if type(property_list) != list:
                     property_list = property_list.split(",")
@@ -358,6 +374,7 @@ def main(req: HttpRequest) -> HttpResponse:
                 # current_pref = fetch_userpref(user["id"])
                 # print(current_pref)
 
+
                 # pref_res = second_response.choices[0]["message"]["content"].strip()
                 # parsed_data = json.loads(pref_res)
                 # print("Second_response:XXXXX",pref_res)
@@ -387,3 +404,10 @@ def main(req: HttpRequest) -> HttpResponse:
         return HttpResponse(output)
     else:
         return HttpResponse("Please pass a message on the query string or in the request body", status_code=400)
+
+
+def main(req: HttpRequest) -> HttpResponse:
+    try:
+        return main_inner(req)
+    except:
+        return HttpResponse("error", status_code=500)
