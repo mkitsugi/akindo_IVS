@@ -4,3 +4,4 @@ python-dotenv==0.19.2
 azure-functions==1.14.1b3
 azure-cosmos
 langchain
+asyncio
