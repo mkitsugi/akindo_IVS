@@ -99,7 +99,7 @@ functions = [
         "parameters": {
             "type": "object",
             "properties": {
-                # property引数の情報
+                # change_to_JSON関数の引数であるproperty引数の情報
                 "property": {
                     "type": "string",
                     "description": """ユーザからの応答を以下のように分割してlist形式で入力する

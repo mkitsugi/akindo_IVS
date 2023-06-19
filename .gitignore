@@ -2,4 +2,6 @@
 /.next/
 /out/
 /azure/TEST/.env
-azure/TEST/strage
+azure/TEST/strage_1
+azure/TEST/strage_2
+azure/TEST/strage_3
