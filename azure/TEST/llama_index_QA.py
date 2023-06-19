@@ -1,5 +1,4 @@
 import os
-
 import openai
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
@@ -73,7 +72,7 @@ service_context = ServiceContext.from_defaults(
 )
 
 
-# データの準備
+# データの準備 / 本番はDBから取ってくる想定
 data = [
     "そうなんだよね、最近困ってて…",
     "仕事が忙しくて、彼女も見つけられないんだよねー。いい人いないかな？優しくて明るい人！",
@@ -87,12 +86,13 @@ data = [
     "僕の趣味覚えてる？",
     "僕のの好きなものは唐揚げなんだー",
 ]
+
 # List[Document]に変形する
 documents = [Document(text=item) for item in data]
 
 # インデックスを作成する
-index = VectorStoreIndex.from_documents(documents, service_context=service_context)
-index.storage_context.persist("azure/TEST/strage")
+index = VectorStoreIndex.from_documents(documents, service_context=service_context) #ベクトルデータの生成
+index.storage_context.persist("azure/TEST/strage") #AzureのDBに投げる
 
 # クエリエンジンを生成する
 query_engine = index.as_query_engine(
@@ -105,3 +105,6 @@ response = query_engine.query(qestion)
 print(response)
 # >>> 唐揚げです。
 print(response.get_formatted_sources(length=4096))
+
+#質問に対する回答
+#データをベクトルデータに変更

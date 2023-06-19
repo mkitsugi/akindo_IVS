@@ -111,3 +111,6 @@ response = query_engine.query(qestion)
 print(response)
 # >>> 唐揚げです。
 print(response.get_formatted_sources(length=4096))
+
+# userのチャットメッセージだけ取ってくる
+# llama_indexにコピペで投げている

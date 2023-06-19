@@ -20,6 +20,7 @@ function mapToChatType(chatData: any): ChatType {
     createdAt: chatData.createdAt,
     user_id: chatData.user_id,
     message: chatData.message,
+    isImage: chatData.isImage,
   };
 }
 

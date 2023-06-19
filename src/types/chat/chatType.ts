@@ -4,4 +4,5 @@ export type ChatType = {
   createdAt : number;
   user_id: string;
   message: string;
+  isImage: Boolean;
 };
