@@ -398,10 +398,12 @@ const Index = () => {
 
   //Azure Function Call
   const sendToAI = async (message: string) => {
+    const user_id = userInfo?.id
     try {
       const response = await axios.post("/api/chat_gptResponse", { message, roomId });
       return response.data;
     } catch (e) {
+
       console.error("API Error:", e); // APIからのエラーを確認
     }
   };
@@ -468,7 +470,7 @@ const Index = () => {
     <Flex
       direction={"column"}
       py="1rem"
-      h={isInputFocused ? `${windowHeight}px` : `${windowHeight}px`}
+      h={isInputFocused ? `${windowHeight}px` : `${windowHeight-10}px`}
       overflow={"hidden"}
     >
       <Flex
@@ -476,6 +478,7 @@ const Index = () => {
         justifyContent={"space-between"}
         px="1rem"
         mb="1rem"
+        pt="2rem" //demo用
       >
         <Box
           onClick={() => {
