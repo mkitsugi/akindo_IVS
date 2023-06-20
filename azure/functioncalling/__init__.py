@@ -226,6 +226,7 @@ def main(req: HttpRequest) -> HttpResponse:
                     ],
                 )
 
+
                 # この処理で作成されたresponseの整形処理
                 pref_res = second_response.choices[0]["message"]["content"].strip()
                 parsed_data = json.loads(pref_res)
@@ -242,6 +243,7 @@ def main(req: HttpRequest) -> HttpResponse:
                 if isinstance(parsed_data, dict):
                     pref = check_db(pref, parsed_data)
                     update_userpref(current_pref)
+
 
             else:
                 function_name = "change_to_JSON"
