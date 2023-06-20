@@ -400,7 +400,7 @@ const Index = () => {
   const sendToAI = async (message: string) => {
     const user_id = userInfo?.id
     try {
-      const response = await axios.post("/api/chat_gptResponse", { message, roomId });
+      const response = await axios.post("/api/chat_gptResponse", { message, user_id, roomId });
       return response.data;
     } catch (e) {
 

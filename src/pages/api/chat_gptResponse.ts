@@ -11,7 +11,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
   }
 
   try {
-    const response = await axios.post(process.env.AZURE_FUNCTION_URL, { message, roomId });
+    const response = await axios.post(process.env.AZURE_FUNCTION_URL, { message, user_id, roomId });
     const reply = response.data;
     res.json(reply);
   } catch (error) {
