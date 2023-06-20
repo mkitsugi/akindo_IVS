@@ -1,14 +1,17 @@
-import json
 import logging
+import json
 import os
 import uuid
 from asyncio import exceptions
 
-import openai
 import requests
+import openai
 from azure.cosmos import CosmosClient, exceptions
 from azure.functions import HttpRequest, HttpResponse
 from dotenv import load_dotenv
+from langchain.memory import ConversationBufferMemory, ChatMessageHistory
+from langchain.schema import HumanMessage, AIMessage
+from langchain.chains import ConversationChain
 from langchain import LLMChain, PromptTemplate
 from langchain.chains import ConversationChain
 from langchain.chat_models import ChatOpenAI
@@ -19,14 +22,14 @@ from langchain.memory import (
 )
 from langchain.schema import AIMessage, HumanMessage
 
-from .db_check import check_db
-
 # APIキーの取得
 load_dotenv()
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
 openai.api_key = OPENAI_KEY
 
-# function_callingのAPIURLの取得
+from .db_check import check_db
+
+#function_callingのAPIURLの取得
 function_calling_url = os.environ.get("FUNCTION_CALLING_URL")
 
 # Cosmos DB接続設定
@@ -45,19 +48,16 @@ item_id = "a085dd38-9318-48cc-a8f4-49f0e4866190"
 # llmモデルの設定
 llm = ChatOpenAI(temperature=0.3, model="gpt-3.5-turbo-16k-0613")
 
-
 # プロンプトの取得
 def get_prompts():
     item_id = "a085dd38-9318-48cc-a8f4-49f0e4866190"
     item = prompt_container.read_item(item=item_id, partition_key=item_id)
     return item
 
-
 # ユーザー情報の取得
 def get_user(user_id: str):
     user = user_container.read_item(item=user_id, partition_key=user_id)
     return user
-
 
 # ユーザー属性のアップロード
 def upload_userpref(user_id: str, response: dict) -> None:
@@ -87,7 +87,6 @@ def fetch_userpref(user_id: str):
 def update_userpref(new: dict) -> None:
     pref_container.upsert_item(new)
 
-
 # 情報量の有無を確認する
 def get_item_information(message: str, template: str) -> str:
     prompt = PromptTemplate(
@@ -98,7 +97,6 @@ def get_item_information(message: str, template: str) -> str:
     result = chain.run(userinput=message).strip()
     return result
 
-
 def change_to_JSON(property: list) -> dict:
     if len(property) % 2 == 1:
         tmp = """ {"like":[], "dislike":[]} """
@@ -107,7 +105,6 @@ def change_to_JSON(property: list) -> dict:
     # Pythonの辞書リストをJSON形式の文字列に変換
     json_str = json.dumps(dicts, ensure_ascii=False)
     return json_str
-
 
 # Function callingで使用するfunction
 functions = [
@@ -138,42 +135,45 @@ functions = [
 
 
 def main(req: HttpRequest) -> HttpResponse:
+
     # messageの箱定義
     messages = []
 
-    # APIリクエストからParmasの受領
-    initial_message = req.params.get("message")
-    user_id = req.params.get("user_id")  # user_idをクライアント側から取得
-    chatroomid = req.params.get("roomId")  # chatroomidをクライアント側から取得
-
-    # req_bodyの取得
+    #APIリクエストからParmasの受領
+    initial_message = req.params.get('message')
+    user_id = req.params.get('user_id')  # user_idをクライアント側から取得
+    chatroomid = req.params.get('roomId')  # chatroomidをクライアント側から取得
+    
+    #req_bodyの取得
     if not initial_message:
         try:
             req_body = req.get_json()
         except ValueError:
             pass
         else:
-            initial_message = req_body.get("message")  # メッセージをクライアント側から取得
-            user_id = req_body.get("user_id")  # user_idをクライアント側から取得
-            chatroomid = req_body.get("roomId")  # chatroomidをクライアント側から取得
+            initial_message = req_body.get('message') #メッセージをクライアント側から取得
+            user_id = req_body.get('user_id')  # user_idをクライアント側から取得
+            chatroomid = req_body.get('roomId')  # chatroomidをクライアント側から取得
 
     # promptsリストの受領
     prompts = get_prompts()
 
-    # user属性の取得
+    #user属性の取得
     user = get_user(user_id)
 
-    # メッセージにプロンプトを追加
+    #メッセージにプロンプトを追加
     messages.append({"role": "system", "content": prompts["BASE_PROMPT"]})
-    # メッセージにユーザーメッセージを追加
+    #メッセージにユーザーメッセージを追加
     messages.append({"role": "user", "content": initial_message})
 
+
     # 応答文から情報量の有無を確認する
-    response = get_item_information(initial_message, prompts["ASK_QUESTION_TYPE_TEMPLATE"])
+    response = get_item_information(initial_message,prompts["ASK_QUESTION_TYPE_TEMPLATE"])
     print("情報量があるかないか:", response)
 
     if "情報量あり" in response:
-        # openAIのresの取得
+
+        #openAIのresの取得
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo-16k-0613",
             messages=[
@@ -189,7 +189,8 @@ def main(req: HttpRequest) -> HttpResponse:
         if message.get("function_call"):
             # エラーハンドリング
             if "function_call" in message and "name" in message["function_call"]:
-                # 関数の実行
+
+                #関数の実行
                 # 使うと判断された関数名
                 function_name = message["function_call"]["name"]
                 # TODO LLMだとブレがあるのでフォーマットがおかしい時はもう一回とかの処理入れる
@@ -204,6 +205,7 @@ def main(req: HttpRequest) -> HttpResponse:
 
                 print("function_response: ", function_response)
 
+
                 messages.append(
                     {
                         "role": "function",
@@ -212,7 +214,7 @@ def main(req: HttpRequest) -> HttpResponse:
                     }
                 )
 
-                # 関数の実行
+                #関数の実行
                 second_response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo-16k-0613",
                     messages=[
@@ -226,28 +228,26 @@ def main(req: HttpRequest) -> HttpResponse:
                     ],
                 )
 
+                ###PrefDBへの反映
+                #現在のPrefデータの取得
+                current_pref = fetch_userpref(user["id"])
+                pref = current_pref["preferences"]
 
-                # この処理で作成されたresponseの整形処理
+                #この処理で作成されたresponseの整形処理
                 pref_res = second_response.choices[0]["message"]["content"].strip()
                 parsed_data = json.loads(pref_res)
 
-                print("Second_response:XXXXX", pref_res)
                 print(isinstance(parsed_data, dict))
 
-                ###PrefDBへの反映
-                # 現在のPrefデータの取得
-                current_pref = fetch_userpref(user["id"])
-                pref = current_pref["preferences"]
-                # 現在のPrefデータがあれば新規のPrefデータの比較する
 
+                #現在のPrefデータがあれば新規のPrefデータの比較する
                 if isinstance(parsed_data, dict):
-                    pref = check_db(pref, parsed_data)
-                    update_userpref(current_pref)
-
+                    pref = check_db(pref,parsed_data)
+                    update_userpref(new=current_pref)
 
             else:
                 function_name = "change_to_JSON"
 
-    # APIリクエストからParmasの受領
+    #APIリクエストからParmasの受領
 
-    return
+    return 
