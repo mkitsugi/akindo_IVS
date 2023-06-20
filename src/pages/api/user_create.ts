@@ -51,6 +51,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const { resource: createdPref } = await cosmosClient.database
       .container("Pref")
       .items.create({
+        id: createdItem?.id,
         user_id: createdItem?.id,
         preferences : {"種類":"日本人"} 
       });
