@@ -5,3 +5,4 @@ azure-functions==1.14.1b3
 azure-cosmos
 langchain
 asyncio
+requests

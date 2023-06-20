@@ -8,7 +8,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     // chatsコンテナにchatroomを生成
     const { resource: createdChatRoom } = await cosmosClient.database.container("ChatRooms").items.create({
-      participants_id : [userId, "AI", "01816075-d490-411e-ad15-6c9c2a622a50"],
+      participants_id : [userId, "AI", "5f3abdb4-23ca-4c3b-87e3-f12c9e3d4ca3"],
       createdAt : Date.now()
     });
 
