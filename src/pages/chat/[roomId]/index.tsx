@@ -254,13 +254,13 @@ const Index = () => {
       setDotsCount((prevCount) => (prevCount + 1) % 4); // ドットの数を4で割った余りを更新
     }, 450); // 450ミリ秒ごとに更新
 
-    const timeout = setTimeout(() => {
-      clearInterval(interval); // 1分後にインターバルをクリアする
-    }, 60000); // 1分(60秒)
+    // const timeout = setTimeout(() => {
+    //   clearInterval(interval); // 1分後にインターバルをクリアする
+    // }, 60000); // 1分(60秒)
 
     return () => {
       clearInterval(interval); // コンポーネントがアンマウントされた時にインターバルをクリアする
-      clearTimeout(timeout); // コンポーネントがアンマウントされた時にタイムアウトもクリアする
+      // clearTimeout(timeout); // コンポーネントがアンマウントされた時にタイムアウトもクリアする
     };
   }, []);
 

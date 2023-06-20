@@ -266,7 +266,6 @@ functions = [
 
 
 def main_inner(req: HttpRequest) -> HttpResponse:
-
     
     #APIリクエストからParmasの受領
     initial_message = req.params.get('message')
@@ -286,7 +285,7 @@ def main_inner(req: HttpRequest) -> HttpResponse:
 
     # promptsリストの受領
     prompts = get_prompts()
-    # upload_prompts("BASE_PROMT", BASE_PROMPT)
+    # upload_prompts("BASE_PROMT", BASE_PROMPT) #PROMPTの更新
 
     payload = {"message":initial_message, "user_id": user_id, "chatroomId": chatroomid}
     requests.post(function_calling_url, json=payload)

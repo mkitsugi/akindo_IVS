@@ -235,7 +235,6 @@ def main(req: HttpRequest) -> HttpResponse:
                     ],
                 )
 
-
                 ###PrefDBへの反映
                 #現在のPrefデータの取得
                 current_pref = fetch_userpref(user["id"])
@@ -244,6 +243,7 @@ def main(req: HttpRequest) -> HttpResponse:
                 #この処理で作成されたresponseの整形処理
                 pref_res = second_response.choices[0]["message"]["content"].strip()
                 parsed_data = json.loads(pref_res)
+
 
                 print("Second_response:XXXXX",pref_res)
                 print(isinstance(parsed_data, dict))
@@ -259,6 +259,7 @@ def main(req: HttpRequest) -> HttpResponse:
                     if isinstance(pref_res, dict):
                         print("step3:", parsed_data)
                         upload_userpref(user_id=user["id"],response=pref_res)
+
 
             else:
                 function_name = "change_to_JSON"
