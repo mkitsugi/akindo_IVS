@@ -86,7 +86,6 @@ def fetch_userpref(user_id: str):
 
 def update_userpref(new: dict) -> None:
     pref_container.upsert_item(new)
-    return new
 
 # 情報量の有無を確認する
 def get_item_information(message: str, template: str) -> str:
