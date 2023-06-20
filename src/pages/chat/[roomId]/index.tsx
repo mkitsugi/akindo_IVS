@@ -446,6 +446,7 @@ const Index = () => {
   };
 
   const restaurant = async() => {
+
     const aiChatInfo: ChatType = {
       chatId: uuid(),
       chatRoomId: roomId,
@@ -555,11 +556,11 @@ const Index = () => {
               )}
               {message.message === "ここ２人にぴったりだと思うよー！☺️" && message.user_id === "AI"/*特定のメッセージID*/ && (
                 <>
-                <Box height={"400px"} overflowX="scroll" overflowY="hidden" >
+                <Box height={"400px"} overflowX="scroll" overflowY="auto" >
                   <Grid
                     templateColumns="repeat(3, 1fr)" // 2列のレイアウト
                     gap={4} // 画像間のスペース
-                    // width={"800px"} 
+                    width={"800px"} 
                     // height={375}
                     px={5}
                     marginX="auto" // 水平方向に中央揃え
@@ -570,9 +571,8 @@ const Index = () => {
                           src={image.url}
                           rounded="md"
                           width={400}
-                          height={430}
+                          height={150}
                           objectFit="cover"
-                          onClick={() => handleImageClick(image.url)}
                           _hover={{ cursor: "pointer" }}
                         />
                         <Box bg="#444444" color="white" rounded="lg"  mt={2} fontSize="small" fontWeight="bold" boxShadow="base">

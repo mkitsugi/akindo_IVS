@@ -3,6 +3,7 @@ import os
 import uuid
 from asyncio import exceptions
 
+import requests
 import openai
 from azure.cosmos import CosmosClient, exceptions
 from azure.functions import HttpRequest, HttpResponse
@@ -19,11 +20,15 @@ from langchain.memory import (
     ConversationEntityMemory,
 )
 from langchain.schema import AIMessage, HumanMessage
+from .db_check import check_db
 
 # APIキーの取得
 load_dotenv()
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY")
 openai.api_key = OPENAI_KEY
+
+#function_callingのAPIURLの取得
+function_calling_url = os.environ.get("FUNCTION_CALLING_URL")
 
 # Cosmos DB接続設定
 COSMOS_DB_CONNECTION_STR = os.environ.get("COSMOS_DB_CONNECTION_STR")
@@ -48,6 +53,13 @@ def get_prompts():
     item = prompt_container.read_item(item=item_id, partition_key=item_id)
 
     return item
+
+def upload_prompts(name:str, prompt:str):
+    item_id = "a085dd38-9318-48cc-a8f4-49f0e4866190"
+    item_response = prompt_container.read_item(item=item_id, partition_key=item_id)
+    item_response[prompt] = prompt
+    prompt_container.replace_item(item=item_response['id'], body=item_response)
+    return  
 
 
 # ユーザー情報の取得
@@ -133,38 +145,6 @@ BASE_PROMPT = """あなたは以下の設定を持ったchatbotです
                #質問: {input}
                #AI: 
 """
-# base_prompt = """あなたは以下の設定を持ったchatbotです\
-#                ###設定\
-#                - あなたは相手の恋愛相談に乗る女性の友達です\
-#                - あなたは聞き役に徹して相手の説明した内容に対して共感をすることに徹してください\
-#                - あなたは会話を通じて、相手の好みや嗜好性を聞き出し、恋愛において最も相性の良いパートナーを提案します。\
-#                - あなたが情報を聞き出すことは1つのトピックスにつき、1回だけです。また、共感が最優先のため、共感の妨げになる場合は、質問はしないでください\
-#                - 普段友達とやりとりするチャットなので、基本的には2-3行に収めてください\
-#                ###言葉遣い\
-#                - フランクでカジュアルな言葉遣いを徹底してください。\
-#                - 「ありがとうね」「わかったー！」「そうなんだけど...」「なんか」「見てみたいなー！」「そうなんだ！」「そうなんだね！」「そうなの！」「そういえば、」「そうなんだっけー？」「とか」「どうかなー？」\
-#                - チャットでのやり取りなので、可愛らしい絵文字を使ってください。\
-#                ###具体例\
-#                - 相手:相談に乗って欲しい...！
-#                - え！本当に！嬉しいんだけど😍\最近会ってないから久しぶりにまいちゃんの写真見てみたいなー？🥺\
-#                - 相手:""写真のURL""\
-#                - ありがとう、元気そうで良かったよ☺️\n最近、仕事とか大変だったりするのー？\
-#                - そうー、今結構忙しくて、夜も働いててあんまり遊んだりできてないんだ。。。\
-#                - そうなんだ！夜も働いてて結構忙しくて遊べてないんだね...\
-#                - そういえば、どれくらい彼氏いないんだっけー？\
-#                - 相手:もう1年くらいいないの...😭\
-#                - あなた:そうなの！もう1年くらいもいないのはビックリだよ！😱\
-#                - あなた:なんか知り合いとか探してみよっかー？どんな人がいいとかあったりするー？\
-#                - 相手:お願いしたいよー！うーんとね、とりあえず20代で清潔感があって面白い人がいい!笑\
-#                - あなた: 20代で清潔感がある面白い人だね！ちょっと探してみるね！\
-
-#                ###会話履歴: {history}
-
-#                ###入力: {input}
-
-#                #出力: 
-
-#                """
 
 
 # 分類処理
@@ -286,15 +266,14 @@ functions = [
 
 
 def main_inner(req: HttpRequest) -> HttpResponse:
-    # messageの箱定義
-    messages = []
 
-
-    #APIリクエストの受領
+    
+    #APIリクエストからParmasの受領
     initial_message = req.params.get('message')
-    # user_id = req.params.get('user_id')  # user_idをクライアント側から取得
+    user_id = req.params.get('user_id')  # user_idをクライアント側から取得
     chatroomid = req.params.get('roomId')  # chatroomidをクライアント側から取得
 
+    #req_bodyの取得
     if not initial_message:
         try:
             req_body = req.get_json()
@@ -307,100 +286,17 @@ def main_inner(req: HttpRequest) -> HttpResponse:
 
     # promptsリストの受領
     prompts = get_prompts()
-    messages.append({"role": "system", "content": prompts["BASE_PROMPT"]})
-    messages.append({"role": "user", "content": initial_message})
+    # upload_prompts("BASE_PROMT", BASE_PROMPT)
 
+    payload = {"message":initial_message, "user_id": user_id, "chatroomId": chatroomid}
+    requests.post(function_calling_url, json=payload)
 
-    #user属性の取得
-    # user = get_user(user_id)
-    # print("User:",user)
-
-    # 情報量の有無を確認する
-    response = get_item_information(initial_message,prompts["ASK_QUESTION_TYPE_TEMPLATE"])
-    print("情報量があるかないか:", response)
-
-    if "情報量あり" in response:
-        #openAIのresの取得
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-16k-0613",
-            messages=[
-                {"role": "user", "content": initial_message},
-            ],
-            functions=functions,
-            function_call="auto",
-        )
-
-        # resのmessage部分を取得
-        message = response["choices"][0]["message"]
-
-        # 関数を使用すると判断された場合
-        if message.get("function_call"):
-            # エラーハンドリング
-            if "function_call" in message and "name" in message["function_call"]:
-                # 使うと判断された関数名
-                function_name = message["function_call"]["name"]
-                # TODO LLMだとブレがあるのでフォーマットがおかしい時はもう一回とかの処理入れる
-                arguments = json.loads(message["function_call"]["arguments"])
-                # property_listを取得
-                property_list = arguments.get("property")
-                if type(property_list) != list:
-                    property_list = property_list.split(",")
-
-                function_response = globals()[function_name](property_list)
-
-                print("function_response: ", function_response)
-
-                messages.append(
-                    {
-                        "role": "function",
-                        "name": function_name,
-                        "content": function_response,
-                    }
-                )
-
-                second_response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo-16k-0613",
-                    messages=[
-                        {"role": "user", "content": initial_message},
-                        message,
-                        {
-                            "role": "function",
-                            "name": function_name,
-                            "content": function_response,
-                        },
-                    ],
-                )
-
-                # current_pref = fetch_userpref(user["id"])
-                # print(current_pref)
-
-
-                # pref_res = second_response.choices[0]["message"]["content"].strip()
-                # parsed_data = json.loads(pref_res)
-                # print("Second_response:XXXXX",pref_res)
-
-                # print(isinstance(parsed_data, dict))
-
-                # if current_pref != {} and isinstance(parsed_data, dict):
-                #     print("step1:", current_pref)
-                #     update_userpref(current=current_pref,new=pref_res)
-                # else:
-                #     print("step2:", current_pref)
-                #     if isinstance(pref_res, dict):
-                #         print("step3:", parsed_data)
-                #         upload_userpref(user_id=user["id"],response=pref_res)
-
-            else:
-                function_name = "change_to_JSON"
-
-    ##いずれのパターンでも処理する情報
-
+    ##いずれのパターンでも処理する応答処理
     if initial_message:
         #ChatDBからデータの取得
         chatsoutput = get_Chats_from_cosmos(chatroomid=chatroomid)
-        #Returnとして返すプロンプトの生成
-        output = output_from_memory(Chats=chatsoutput,initial_message=initial_message,prompt=BASE_PROMPT)
-        
+        #Returnとして返す応答文プロンプトの生成
+        output = output_from_memory(Chats=chatsoutput,initial_message=initial_message,prompt=prompts["BASE_PROMPT"])
         return HttpResponse(output)
     else:
         return HttpResponse("Please pass a message on the query string or in the request body", status_code=400)
